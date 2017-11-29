@@ -1,0 +1,70 @@
+# monsiajのビルド
+
+monsiajのビルドにはmavenを利用します。
+maven3以降が必要となります。
+
+## ビルド方法
+
+以下のコマンドを実行します。
+
+```
+$ cd monsiaj-src
+$ mvn package
+```
+
+ビルドに成功するとtargetディレクトリが作成され、そこにいくつかのファイルやディレクトリが作成されます。
+重要なのは以下のファイルです。
+
+* monsiaj-bin-$VERSION.zip
+    * 配布用バイナリアーカイブ
+        * 単体起動可能jarパッケージとREADME.txtやNimrodテーマファイルを格納
+* monsiaj-src-$VERSION.zip
+    * 配布用ソースアーカイブ
+* monsiaj-$VERSION-all.zip
+    * Java Web Start用署名済みjarファイル
+
+## 署名の設定
+
+pom.xml、maven-jarsigner-pluginプラグインのコメントを解除し編集する。
+
+```
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jarsigner-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>sign</id>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archiveDirectory>${project.build.directory}</archiveDirectory>
+                    <includes>
+                       <include>*.jar</include>
+                    </includes>
+                    <keystore>${project.basedir}/keystore</keystore>
+                    <alias>alias</alias>
+                    <storepass>storepass</storepass>
+                    <keypass>keypass</keypass>
+                    <tsaLocation>http://timestamp.globalsign.com/scripts/timstamp.dll</tsaLocation>                    
+                </configuration>
+            </plugin>
+```
+
+署名用のキーストアの設定を以下の項目で行う。
+
+* keystore
+    * keystoreファイルのパスを入力する
+    * ${project.basedir}はpom.xmlのあるディレクトリに置換される
+* keypass
+    * keystoreに格納されている秘密鍵のパスフレーズを入力する
+* storepass
+    * keystoreのパスフレーズを入力する
+* alias
+    * 証明書のaliasを指定する
+* tsaLocation
+    * 証明書のTSAのURLを指定する
+
