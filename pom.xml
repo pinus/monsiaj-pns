@@ -13,7 +13,7 @@
     </organization>
 
     <properties>
-        <!--     
+        <!--
         <monsia.version>${version}</monsia.version>-->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -35,7 +35,7 @@
     </pluginRepositories>
 
     <build>
-        <plugins>            
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -44,7 +44,7 @@
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>                            
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
                             <mainClass>org.montsuqi.monsiaj.client.Launcher</mainClass>
                         </manifest>
@@ -69,12 +69,12 @@
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries> 
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <mainClass>org.montsuqi.monsiaj.client.Launcher</mainClass>
                         </manifest>
                         <manifestEntries>
                             <permissions>all-permissions</permissions>
-                        </manifestEntries>                        
+                        </manifestEntries>
                     </archive>
                 </configuration>
                 <executions>
@@ -87,7 +87,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
@@ -109,10 +109,10 @@
                     <alias>orca_jws2017</alias>
                     <storepass>orca_jws2017</storepass>
                     <keypass>orca_jws2017</keypass>
-                    <tsaLocation>http://timestamp.globalsign.com/scripts/timstamp.dll</tsaLocation>                    
+                    <tsaLocation>http://timestamp.globalsign.com/scripts/timstamp.dll</tsaLocation>
                 </configuration>
             </plugin>
-
+-->
             <!-- rename distribution archive  -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -174,7 +174,7 @@
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-client</artifactId>
             <version>9.4.6.v20170531</version>
-        </dependency>        
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
@@ -215,5 +215,5 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.0</version>
         </dependency>
-    </dependencies>    
+    </dependencies>
 </project>
