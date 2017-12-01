@@ -124,9 +124,15 @@ public class PandaCList extends JTable {
             selectionFGColor = new Color(0xFF, 0xFF, 0xFF);
         }
 
-        if (System.getProperty("monsia.widget.pandaclist.showgrid") == null) {
+        //pns show grid
+        if (System.getProperty("monsia.pandaclist.showgrid") == null) {
             this.setShowGrid(false);
+
+        } else {
+            this.setShowGrid(true);
+            this.setGridColor(new java.awt.Color(235,235,235));
         }
+
         mode = PandaCList.SELECTION_MODE_SINGLE;
 
         addMouseListener(new MouseListener() {
