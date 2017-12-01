@@ -34,9 +34,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-
 import javax.swing.SwingUtilities;
-
 import org.montsuqi.monsiaj.monsia.Interface;
 
 /** <p>A focus manager which delegates actions to Interface object first.</p>
@@ -45,6 +43,9 @@ import org.montsuqi.monsiaj.monsia.Interface;
  */
 public class PandaFocusManager extends DefaultKeyboardFocusManager {
 
+        // pns
+        private static final boolean VERBOSE = false;
+
 	public void processKeyEvent(Component focusedComponent, KeyEvent e) {
 		java.awt.Window w = SwingUtilities.windowForComponent(focusedComponent);
 		// Busy windows should not accept key events.
@@ -52,35 +53,40 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 			return;
 		}
 
-                //pns component label を調べる
-                showComponentLabels(w);
-
                 //pns K03（請求確認）で特別ショートカット処理
                 if ("K03".equals(w.getName())) {
                     if (e.getModifiers() == InputEvent.CTRL_MASK) {
+
                         // ComboBox を探す
-                        // combo[0] = 請求書兼領収書　combo[1] = 診療費明細書　combo[2] = 処方箋
-                        JComboBox[] combo = new JComboBox[3];
-                        searchComboBox(((JFrame)w).getRootPane(), combo);
+                        List<JComboBox> combos = componentPicker(w,
+                                "K03.fixed3.HAKFLGCOMBO",       // 請求書兼領収書
+                                "K03.fixed3.MEIPRTFLG_COMB",    // 診療費明細書
+                                "K03.fixed3.SYOHOPRTFLGCOMBO"); // 処方箋
 
                         switch (e.getKeyCode()) {
                             // CTRL-0　：　領収書，明細書，処方箋発行なし
                             case KeyEvent.VK_0:
-                                combo[0].setSelectedIndex(1);
-                                combo[1].setSelectedIndex(1);
-                                combo[2].setSelectedIndex(1);
+                                combos.get(0).setSelectedIndex(1);
+                                combos.get(1).setSelectedIndex(1);
+                                combos.get(2).setSelectedIndex(1);
                                 break;
-                            // CTRL-1　：　発行あり
+                            // CTRL-1　：　領収書，明細書だけ発行あり
                             case KeyEvent.VK_1:
-                                combo[0].setSelectedIndex(2);
-                                combo[1].setSelectedIndex(2);
-                                combo[2].setSelectedIndex(2);
+                                combos.get(0).setSelectedIndex(2);
+                                combos.get(1).setSelectedIndex(2);
+                                combos.get(2).setSelectedIndex(1);
                                 break;
                             // CTRL-2　：　処方だけ発行あり
                             case KeyEvent.VK_2:
-                                combo[0].setSelectedIndex(1);
-                                combo[1].setSelectedIndex(1);
-                                combo[2].setSelectedIndex(2);
+                                combos.get(0).setSelectedIndex(1);
+                                combos.get(1).setSelectedIndex(1);
+                                combos.get(2).setSelectedIndex(2);
+                                break;
+                            // CTRL-3　：　全部発行あり
+                            case KeyEvent.VK_3:
+                                combos.get(0).setSelectedIndex(2);
+                                combos.get(1).setSelectedIndex(2);
+                                combos.get(2).setSelectedIndex(2);
                                 break;
                         }
                     }
@@ -94,57 +100,46 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 		}
 	}
 
-        //pns 請求書兼領収書，診療費明細書，処方箋のコンボボックスを探す
-        // combo[0] = K03.fixed3.HAKFLGCOMBO　請求書兼領収書
-        // combo[1] = K03.fixed3.MEIPRTFLG_COMB　診療費明細書
-        // combo[2] = K03.fixed3.SYOHOPRTFLGCOMBO　処方箋
-        private void searchComboBox(Component comp, JComboBox[] combo) {
-            if (comp instanceof JComponent) {
-                JComponent jc = (JComponent) comp;
-                for (Component c : jc.getComponents()) {
-                    if (c instanceof JComboBox) {
-                        if ("K03.fixed3.HAKFLGCOMBO".equals(c.getName())) { combo[0] = (JComboBox) c; }
-                        else if ("K03.fixed3.MEIPRTFLG_COMB".equals(c.getName())) { combo[1] = (JComboBox) c; }
-                        else if ("K03.fixed3.SYOHOPRTFLGCOMBO".equals(c.getName())) { combo[2] = (JComboBox) c; }
-                    }
-                    searchComboBox(c, combo);
-                }
-            }
-        }
+        /**
+         * pns 指定された名前の component を返す.
+         * @param <T>
+         * @param name
+         * @return
+         */
+        private <T> List<T> componentPicker(java.awt.Window w, String... name) {
+            if (VERBOSE) { System.out.printf("Window Name : %s", w.getName()); }
 
-        private List<JComponent> componentPicker(Class clazz, String... name) {
-            List<JComponent> items = new ArrayList<>();
+            List<T> items = new ArrayList<>(name.length);
+            for (int i=0; i<name.length; i++) { items.add(null); }
 
+            scan(((JFrame)w).getRootPane(), items, name);
             return items;
         }
 
+        private <T> void scan(Component comp, List<T> items, String[] name) {
+            if (comp instanceof JComponent) {
+                JComponent jc = (JComponent) comp;
 
-        /**
-         * pns component の名前を調べる.
-         * @param w
-         */
-        private void showComponentLabels(java.awt.Window w) {
-            System.out.printf("========= Window Name: %s =========\n", w.getName());
-            scan(((JFrame)w).getRootPane());
-        }
-
-        private void scan(Component c) {
-            if (c instanceof JComponent) {
-                String title = "";
-                if (c instanceof JButton) {
-                    title = ((JButton)c).getText();
-                } else if (c instanceof JLabel) {
-                    title = ((JLabel)c).getText();
-                } else if (c instanceof JComboBox) {
-                    JComboBox cb = (JComboBox) c;
-                    if (cb.getItemCount() != 0) {
-                        title = (String)cb.getItemAt(cb.getItemCount()-1);
+                if (VERBOSE) {
+                    String title = "";
+                    if (jc instanceof JButton) {
+                        title = ((JButton)jc).getText();
+                    } else if (jc instanceof JLabel) {
+                        title = ((JLabel)jc).getText();
+                    } else if (jc instanceof JComboBox) {
+                        JComboBox cb = (JComboBox) jc;
+                        if (cb.getItemCount() != 0) {
+                            title = (String)cb.getItemAt(cb.getItemCount()-1);
+                        }
                     }
+                    System.out.printf("%s [%s] %s\n", jc.getName(), jc.getClass().getName(), title);
                 }
-                System.out.printf("%s [%s] %s\n", c.getName(), c.getClass().getName(), title);
 
-                for (Component comp : ((JComponent)c).getComponents()) {
-                    scan(comp);
+                for (Component c : jc.getComponents()) {
+                    for (int i=0; i<name.length; i++) {
+                        if (name[i].equals(c.getName())) { items.set(i, (T) c); }
+                    }
+                    scan(c, items, name);
                 }
             }
         }
