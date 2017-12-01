@@ -25,7 +25,11 @@ package org.montsuqi.monsiaj.widgets;
 
 import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 import javax.swing.SwingUtilities;
 
@@ -43,6 +47,38 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 		if (w instanceof Window && ! ((Window)w).isActive()) {
 			return;
 		}
+
+                //pns K03（請求確認）で特別ショートカット処理
+                if ("K03".equals(w.getName())) {
+                    if (e.getModifiers() == InputEvent.CTRL_MASK) {
+                        // ComboBox を探す
+                        // combo[0] = 請求書兼領収書　combo[1] = 診療費明細書　combo[2] = 処方箋
+                        JComboBox[] combo = new JComboBox[3];
+                        searchComboBox(((JFrame)w).getRootPane(), combo);
+
+                        switch (e.getKeyCode()) {
+                            // CTRL-0　：　領収書，明細書，処方箋発行なし
+                            case KeyEvent.VK_0:
+                                combo[0].setSelectedIndex(1);
+                                combo[1].setSelectedIndex(1);
+                                combo[2].setSelectedIndex(1);
+                                break;
+                            // CTRL-1　：　発行あり
+                            case KeyEvent.VK_1:
+                                combo[0].setSelectedIndex(2);
+                                combo[1].setSelectedIndex(2);
+                                combo[2].setSelectedIndex(2);
+                                break;
+                            // CTRL-2　：　処方だけ発行あり
+                            case KeyEvent.VK_2:
+                                combo[0].setSelectedIndex(1);
+                                combo[1].setSelectedIndex(1);
+                                combo[2].setSelectedIndex(2);
+                                break;
+                        }
+                    }
+                }
+
 		// if the event is handled by the Interface, do nothing further.
 		if (Interface.handleAccels(e)) {
 			e.consume();
@@ -50,4 +86,22 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 			super.processKeyEvent(focusedComponent, e);
 		}
 	}
+
+        //pns 請求書兼領収書，診療費明細書，処方箋のコンボボックスを探す
+        // combo[0] = K03.fixed3.HAKFLGCOMBO　請求書兼領収書
+        // combo[1] = K03.fixed3.MEIPRTFLG_COMB　診療費明細書
+        // combo[2] = K03.fixed3.SYOHOPRTFLGCOMBO　処方箋
+        private void searchComboBox(Component comp, JComboBox[] combo) {
+            if (comp instanceof JComponent) {
+                JComponent jc = (JComponent) comp;
+                for (Component c : jc.getComponents()) {
+                    if (c instanceof JComboBox) {
+                        if ("K03.fixed3.HAKFLGCOMBO".equals(c.getName())) { combo[0] = (JComboBox) c; }
+                        else if ("K03.fixed3.MEIPRTFLG_COMB".equals(c.getName())) { combo[1] = (JComboBox) c; }
+                        else if ("K03.fixed3.SYOHOPRTFLGCOMBO".equals(c.getName())) { combo[2] = (JComboBox) c; }
+                    }
+                    searchComboBox(c, combo);
+                }
+            }
+        }
 }
