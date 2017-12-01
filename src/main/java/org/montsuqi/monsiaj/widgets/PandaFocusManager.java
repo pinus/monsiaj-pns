@@ -53,12 +53,13 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 			return;
 		}
 
-                //pns K03（請求確認）で特別ショートカット処理
-                if ("K03".equals(w.getName())) {
-                    if (e.getModifiers() == InputEvent.CTRL_MASK) {
+                //pns 特別ショートカット
+                if (e.getModifiers() == InputEvent.CTRL_MASK) {
+                    //pns K03（請求確認）で特別ショートカット処理
+                    if ("K03".equals(w.getName())) {
 
                         // ComboBox を探す
-                        List<JComboBox> combos = componentPicker(w,
+                        List<JComboBox<?>> combos = componentPicker(w,
                                 "K03.fixed3.HAKFLGCOMBO",       // 請求書兼領収書
                                 "K03.fixed3.MEIPRTFLG_COMB",    // 診療費明細書
                                 "K03.fixed3.SYOHOPRTFLGCOMBO"); // 処方箋
@@ -89,6 +90,18 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
                                 combos.get(2).setSelectedIndex(2);
                                 break;
                         }
+
+                    //pns C02 病名登録　
+                    } else if ("C02".equals(w.getName())) {
+                        List<JComboBox<?>> combos = componentPicker(w,
+                                "C02.fixed6.MANSEIFLGCOMBO");  // 疾患区分
+
+                        switch (e.getKeyCode()) {
+                            // CTRL-0　：　疾患区分をクリア
+                            case KeyEvent.VK_0:
+                                combos.get(0).setSelectedIndex(0);
+                                break;
+                        }
                     }
                 }
 
@@ -116,6 +129,13 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
             return items;
         }
 
+        /**
+         * pns 再帰スキャン.
+         * @param <T>
+         * @param comp
+         * @param items
+         * @param name
+         */
         private <T> void scan(Component comp, List<T> items, String[] name) {
             if (comp instanceof JComponent) {
                 JComponent jc = (JComponent) comp;
