@@ -119,6 +119,42 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>
                 <executions>
+                    <!-- make mac app bundle -->
+                    <execution>
+                      <phase>package</phase>
+                      <goals>
+                        <goal>run</goal>
+                      </goals>
+                      <configuration>
+                        <target>
+                          <property name="target.dir" value="${project.build.directory}" />
+                          <property name="icon.dir" value="${basedir}/resources" />
+                          <property name="icon.name" value="jma-logo.icns"/>
+                          <property environment="env" />
+                          <property name="macosx.app.name" value="JMA Receipt"/>
+
+                          <taskdef name="bundleapp"
+                                  classname="com.oracle.appbundler.AppBundlerTask"
+                                  classpath="lib/appbundler-1.0ea.jar" />
+                          <bundleapp outputdirectory="${target.dir}"
+                              name="${macosx.app.name}"
+                              displayname="${macosx.app.name}"
+                              identifier="${macosx.app.name}"
+                              mainclassname="org.montsuqi.monsiaj.client.Launcher"
+                              icon="${icon.dir}/${icon.name}" >
+
+                              <classpath file="${target.dir}/monsiaj-${project.version}-all.jar" />
+                              <option value="-Xdock:icon=Contents/Resources/${icon.name}"/>
+                              <option value="-Dapple.laf.useScreenMenuBar=true"/>
+                              <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
+                              <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
+                              <option value="-Dapple.awt.application.name=${macosx.app.name}"/>
+                              <option value="-Duser.dir=$APP_ROOT/.." />
+                          </bundleapp>
+                        </target>
+                      </configuration>
+                    </execution>
+
                     <execution>
                         <id>rename-dist-archives</id>
                         <phase>package</phase>
@@ -140,6 +176,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
                 <executions>
                     <execution>
                         <id>install-local-jar</id>
