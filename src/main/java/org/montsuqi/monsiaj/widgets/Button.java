@@ -34,7 +34,7 @@ import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
 /** <p>A class that simulates Gtk+'s Button widget.</p>
- * 
+ *
  * <p>Down arrow key moves focus out to the next component, and
  * up arrow key moves focus out to the previous component respectively.</p>
  * <p>Enter key simulates button press.</p>
@@ -55,13 +55,13 @@ public class Button extends JButton {
 
 	private void initActions() {
 		ActionMap actions = getActionMap();
-		actions.put("focusOutNext", new FocusOutNextAction()); 
-		actions.put("focusOutPrevious", new FocusOutPreviousAction()); 
+		actions.put("focusOutNext", new FocusOutNextAction());
+		actions.put("focusOutPrevious", new FocusOutPreviousAction());
 
 		InputMap inputs = getInputMap(JComponent.WHEN_FOCUSED);
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext"); 
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious"); 
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "pressed"); 
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), "released"); 
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext");
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious");
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "pressed");
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), "released");
 	}
 }

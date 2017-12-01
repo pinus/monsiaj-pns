@@ -32,7 +32,7 @@ import javax.swing.SwingUtilities;
 import org.montsuqi.monsiaj.monsia.Interface;
 
 /** <p>A focus manager which delegates actions to Interface object first.</p>
- * 
+ *
  * <p>It ignores key events if the window of the component is not active(is busy).</p>
  */
 public class PandaFocusManager extends DefaultKeyboardFocusManager {

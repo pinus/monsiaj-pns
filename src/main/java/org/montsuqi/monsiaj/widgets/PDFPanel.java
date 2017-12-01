@@ -41,8 +41,8 @@ import org.apache.logging.log4j.LogManager;
  */
 class PDFPanel extends JPanel {
 
-    static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(PDFPanel.class);    
-    
+    static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(PDFPanel.class);
+
     private PDFFile pdffile;
     private PDFPage page;
     private int pagenum;
@@ -96,7 +96,7 @@ class PDFPanel extends JPanel {
         try {
             page.waitForFinish();
         } catch (Exception ex) {
-            logger.catching(org.apache.logging.log4j.Level.WARN, ex);            
+            logger.catching(org.apache.logging.log4j.Level.WARN, ex);
         }
         showPage();
     }

@@ -40,7 +40,7 @@ import org.montsuqi.monsiaj.widgets.PandaPreview;
  */
 public class Download {
     private static final Logger logger = LogManager.getLogger(Download.class);
-    
+
     private static void showReportDialog(String title, File file) throws IOException {
         final JDialog dialog = new JDialog();
         Button closeButton = new Button(new AbstractAction(Messages.getString("PrintReport.close")) {
@@ -144,8 +144,8 @@ public class Download {
         } catch (JSONException ex) {
             logger.catching(Level.WARN, ex);
         }
-    }    
-    
+    }
+
     public static void downloadFile(Config conf,Protocol protocol, JSONObject item)  {
         try {
             if (!item.has("object_id")) {
@@ -182,5 +182,5 @@ public class Download {
         } catch (JSONException ex) {
             logger.catching(Level.WARN, ex);
         }
-    }    
+    }
 }

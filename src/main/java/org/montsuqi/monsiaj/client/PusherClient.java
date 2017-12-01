@@ -101,7 +101,7 @@ public class PusherClient extends Thread {
                 }
                 PusherWebSocket socket = new PusherWebSocket();
                 try {
-                    wait(waitMs);                    
+                    wait(waitMs);
                     client.setMaxIdleTimeout(Long.MAX_VALUE);
                     client.start();
                     ClientUpgradeRequest request = new ClientUpgradeRequest();

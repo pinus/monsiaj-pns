@@ -32,7 +32,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-/** <p>A image label components that simulates Gtk+'s Pixmap widget.</p> 
+/** <p>A image label components that simulates Gtk+'s Pixmap widget.</p>
  */
 public class Pixmap extends JLabel {
 

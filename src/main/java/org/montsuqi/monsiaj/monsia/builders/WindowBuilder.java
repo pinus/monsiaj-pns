@@ -35,7 +35,7 @@ import org.montsuqi.monsiaj.widgets.Fixed;
 import org.montsuqi.monsiaj.widgets.Window;
 
 /** <p>A builder to create Window(top level) widget.</p>
- * <p>Since dialogs are variation of windows in Gtk+ while dialogs and windows are 
+ * <p>Since dialogs are variation of windows in Gtk+ while dialogs and windows are
  * different in Swing. Both treated as Window here.</p>
  */
 public class WindowBuilder extends ContainerBuilder {

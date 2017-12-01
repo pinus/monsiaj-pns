@@ -113,7 +113,7 @@ public class ConfigPanel extends JPanel {
     private final MetalTheme systemMetalTheme;
     // Info Tab
     protected JPanel infoPanel;
-  
+
     /**
      * <p>
      * An action to pop a fiel selection dialog.</p>
@@ -251,7 +251,7 @@ public class ConfigPanel extends JPanel {
         this.systemMetalTheme = MetalLookAndFeel.getCurrentTheme();
         basicPanel = createBasicPanel();
         sslPanel = createSSLPanel();
-        printerConfigPanel = new PrinterConfigPanel(conf.getPrinterList());        
+        printerConfigPanel = new PrinterConfigPanel(conf.getPrinterList());
         othersPanel = createOthersPanel();
         infoPanel = createInfoPanel();
     }
@@ -288,7 +288,7 @@ public class ConfigPanel extends JPanel {
         usePKCS11Checkbox.setSelected(usePKCS11);
         pkcs11LibEntry.setText(pkcs11Lib);
         pkcs11SlotEntry.setText(slot);
-        
+
         // Printer tab
         printerConfigPanel.setPrinterConfigMap(conf.getPrinterConfig(num));
 
@@ -337,7 +337,7 @@ public class ConfigPanel extends JPanel {
         conf.setUsePKCS11(num, usePKCS11Checkbox.isSelected());
         conf.setPKCS11Lib(num, pkcs11LibEntry.getText());
         conf.setPKCS11Slot(num, pkcs11SlotEntry.getText());
-        
+
         // Printer Tab
         conf.setPrinterConfig(num, printerConfigPanel.getPrinterConfigMap());
 
@@ -761,7 +761,7 @@ public class ConfigPanel extends JPanel {
     public JPanel getSSLPanel() {
         return sslPanel;
     }
-    
+
     public PrinterConfigPanel getPrinterConfigPanel() {
         return printerConfigPanel;
     }

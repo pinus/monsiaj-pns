@@ -66,13 +66,13 @@ public class Config {
         } else {
             DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
             PrintService[] pss = PrintServiceLookup.lookupPrintServices(flavor, null);
-            LOGGER.debug("-----");             
+            LOGGER.debug("-----");
             for (PrintService ps : pss) {
-                LOGGER.debug(ps.getName() + "#:#" + ps);                
+                LOGGER.debug(ps.getName() + "#:#" + ps);
                 PRINTER_SERVICE_MAP.put(ps.getName(), ps);
                 PRINTER_LIST.add(ps.getName());
             }
-            LOGGER.debug("-----");                         
+            LOGGER.debug("-----");
             Collections.sort(PRINTER_LIST, new Comparator<Object>() {
                 @Override
                 public int compare(Object o1, Object o2) {
@@ -561,7 +561,7 @@ public class Config {
         PrintService ps = PRINTER_CONFIG_MAP.get(printer);
         if (ps == null) {
             ps = PRINTER_CONFIG_MAP.get("default");
-        } 
+        }
         return ps;
     }
 

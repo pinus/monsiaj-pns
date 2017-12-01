@@ -35,7 +35,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 /** <p>A class that simulates Gtk+'s CheckBox.</p>
- * 
+ *
  * <p>Down arrow key moves focus out to the next component, and
  * up arrow key moves focus out to the previous component respectively.
  */
@@ -53,14 +53,14 @@ public class CheckBox extends JCheckBox {
 
     private void initActions() {
         ActionMap actions = getActionMap();
-        actions.put("focusOutNext", new FocusOutNextAction()); 
-        actions.put("focusOutPrevious", new FocusOutPreviousAction()); 
+        actions.put("focusOutNext", new FocusOutNextAction());
+        actions.put("focusOutPrevious", new FocusOutPreviousAction());
 
         InputMap inputs = getInputMap(JComponent.WHEN_FOCUSED);
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext"); 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious"); 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "pressed"); 
-        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), "released"); 
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "pressed");
+        inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), "released");
     }
 
     /** <p>Overrides super.setSize to ensure width is not zero.</p>

@@ -247,7 +247,7 @@ public class PDFPrint extends Thread {
                 return NO_SUCH_PAGE;
             }
 
-            // fit the PDFPage into the printing area                
+            // fit the PDFPage into the printing area
             PDFPage page = pages[index];
             int width = (int) page.getWidth();
             int height = (int) page.getHeight();

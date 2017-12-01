@@ -37,14 +37,14 @@ final class FakeEncodingInputStream extends InputStream {
 	byte[] headerBytes;
 	private int index;
 
-	private static final String REAL_HEADER = "<?xml version=\"1.0\"?>"; 
-	private static final String FAKE_HEADER = "<?xml version=\"1.0\" encoding=\"euc-jp\"?>"; 
+	private static final String REAL_HEADER = "<?xml version=\"1.0\"?>";
+	private static final String FAKE_HEADER = "<?xml version=\"1.0\" encoding=\"euc-jp\"?>";
 
 	public FakeEncodingInputStream(InputStream in) throws IOException {
 		this.in = in;
 		in.skip(REAL_HEADER.length());
 		try {
-			headerBytes = FAKE_HEADER.getBytes("euc-jp"); 
+			headerBytes = FAKE_HEADER.getBytes("euc-jp");
 		} catch (UnsupportedEncodingException e) {
 			throw new IOException(e);
 		}

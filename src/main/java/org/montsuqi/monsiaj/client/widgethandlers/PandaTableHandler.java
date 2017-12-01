@@ -129,7 +129,7 @@ class PandaTableHandler extends WidgetHandler {
 
         widget.validate();
         if (trow >= 0 && tcolumn >= 0) {
-            
+
             //pns 編集中の行があれば選択を変えない begins
             if (editingRow != -1) {
                 // ただし最後の行の編集であれば，selectedRow を１つ下に送る
