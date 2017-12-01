@@ -42,6 +42,7 @@ import org.montsuqi.monsiaj.widgets.PandaTable;
 class PandaTableHandler extends WidgetHandler {
 
     private static final List<String> widgetList;
+    private static int editingRow; //pns 編集中の行
 
     static {
         widgetList = new ArrayList<>();
@@ -50,6 +51,9 @@ class PandaTableHandler extends WidgetHandler {
     @Override
     public void set(UIControl con, Component widget, JSONObject obj, Map styleMap) throws JSONException {
         PandaTable table = (PandaTable) widget;
+
+        //pns 現在編集中の行を保存
+        editingRow = table.getSelectedRow();
 
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
 
@@ -99,16 +103,16 @@ class PandaTableHandler extends WidgetHandler {
             }
         }
 
-        if (obj.has("rowdata")) {           
+        if (obj.has("rowdata")) {
             JSONArray array = obj.getJSONArray("rowdata");
-//System.out.println("rowdata length:"+array.length());                            
+//System.out.println("rowdata length:"+array.length());
             for (int i = 0; i < array.length(); i++) {
                 JSONObject rowObj = array.getJSONObject(i);
                 for (int j = 0; j < table.getColumns(); j++) {
-                    String key = "column" + (j + 1);                    
+                    String key = "column" + (j + 1);
                     if (rowObj.has(key)) {
                         JSONObject colObj = rowObj.getJSONObject(key);
-//System.out.println(key + " " + colObj.toString());                        
+//System.out.println(key + " " + colObj.toString());
                         if (colObj.has("celldata")) {
                             table.setCell(i, j, colObj.getString("celldata"));
                         }
@@ -125,6 +129,15 @@ class PandaTableHandler extends WidgetHandler {
 
         widget.validate();
         if (trow >= 0 && tcolumn >= 0) {
+            
+            //pns 編集中の行があれば選択を変えない begins
+            if (editingRow != -1) {
+                // ただし最後の行の編集であれば，selectedRow を１つ下に送る
+                if (trow == editingRow + 1) { trow = editingRow + 1; }
+                else if (trow > editingRow) { trow = editingRow; }
+            }
+            //pns ends
+
             /*
              * Windows7+Java 1.7で初回表示時にセル指定すると微妙にスクロールする問題のため 初回だけ0,0にセル指定する
              */
@@ -165,7 +178,7 @@ class PandaTableHandler extends WidgetHandler {
 
         int k = 0;
         JSONArray array = new JSONArray();
-        obj.put("rowdata", array);        
+        obj.put("rowdata", array);
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             for (int j = 0; j < table.getColumns(); j++) {
                 String val = (String)tableModel.getValueAt(i, j);
