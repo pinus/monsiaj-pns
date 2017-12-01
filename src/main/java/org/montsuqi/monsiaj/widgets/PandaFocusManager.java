@@ -27,9 +27,13 @@ import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import javax.swing.SwingUtilities;
 
@@ -47,6 +51,9 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 		if (w instanceof Window && ! ((Window)w).isActive()) {
 			return;
 		}
+
+                //pns component label を調べる
+                showComponentLabels(w);
 
                 //pns K03（請求確認）で特別ショートカット処理
                 if ("K03".equals(w.getName())) {
@@ -101,6 +108,43 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
                         else if ("K03.fixed3.SYOHOPRTFLGCOMBO".equals(c.getName())) { combo[2] = (JComboBox) c; }
                     }
                     searchComboBox(c, combo);
+                }
+            }
+        }
+
+        private List<JComponent> componentPicker(Class clazz, String... name) {
+            List<JComponent> items = new ArrayList<>();
+
+            return items;
+        }
+
+
+        /**
+         * pns component の名前を調べる.
+         * @param w
+         */
+        private void showComponentLabels(java.awt.Window w) {
+            System.out.printf("========= Window Name: %s =========\n", w.getName());
+            scan(((JFrame)w).getRootPane());
+        }
+
+        private void scan(Component c) {
+            if (c instanceof JComponent) {
+                String title = "";
+                if (c instanceof JButton) {
+                    title = ((JButton)c).getText();
+                } else if (c instanceof JLabel) {
+                    title = ((JLabel)c).getText();
+                } else if (c instanceof JComboBox) {
+                    JComboBox cb = (JComboBox) c;
+                    if (cb.getItemCount() != 0) {
+                        title = (String)cb.getItemAt(cb.getItemCount()-1);
+                    }
+                }
+                System.out.printf("%s [%s] %s\n", c.getName(), c.getClass().getName(), title);
+
+                for (Component comp : ((JComponent)c).getComponents()) {
+                    scan(comp);
                 }
             }
         }
