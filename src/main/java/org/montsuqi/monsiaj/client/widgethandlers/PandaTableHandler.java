@@ -131,7 +131,8 @@ class PandaTableHandler extends WidgetHandler {
         if (trow >= 0 && tcolumn >= 0) {
 
             //pns 編集中の行があれば選択を変えない begins
-            if (editingRow != -1) {
+            //pns (K98)診療行為一覧選択サブから戻ったときに editingRow が 0 にリセットされてしまうのの workaround 入れた
+            if (editingRow != -1 && con.getTopWindow().getTitle().equals("読み込み中...")) {
                 // ただし最後の行の編集であれば，selectedRow を１つ下に送る
                 if (trow == editingRow + 1) { trow = editingRow + 1; }
                 else if (trow > editingRow) { trow = editingRow; }
