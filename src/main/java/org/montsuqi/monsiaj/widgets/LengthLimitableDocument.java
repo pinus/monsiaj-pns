@@ -42,7 +42,7 @@ public class LengthLimitableDocument extends PlainDocument {
 	}
 
 	/** <p>Sets the limit of document length.</p>
-	 *
+	 * 
 	 * @param limit the limit.
 	 * @throws IllegalArgumentException if the limit is negative.
 	 */
@@ -54,7 +54,7 @@ public class LengthLimitableDocument extends PlainDocument {
 	}
 
 	/** <p>Gets the limit of this document.</p>
-	 *
+	 * 
 	 * @return the limit.
 	 */
 	public int getLimit() {

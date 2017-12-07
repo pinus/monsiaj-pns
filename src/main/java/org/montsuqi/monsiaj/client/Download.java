@@ -39,6 +39,7 @@ import org.montsuqi.monsiaj.widgets.PandaPreview;
  * @author mihara
  */
 public class Download {
+
     private static final Logger logger = LogManager.getLogger(Download.class);
 
     private static void showReportDialog(String title, File file) throws IOException {
@@ -74,7 +75,7 @@ public class Download {
 
     public static void printReport(Config conf, Protocol protocol, JSONObject item) {
         try {
-            logger.debug("printReport:" + item.toString());
+            logger.info("printReport:" + item.toString());
             if (!item.has("object_id")) {
                 return;
             }
@@ -113,13 +114,14 @@ public class Download {
                 }
                 OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
                 protocol.getBLOB(oid, out);
-                logger.info(item);
                 if (showdialog) {
                     showReportDialog(title, file);
                 } else {
+                    int cp = 1;
                     PrintService ps = null;
                     if (printer != null) {
                         ps = conf.getPrintService(printer);
+                        cp = conf.getCopies(printer);
                     }
                     if (ps != null) {
                         PopupNotify.popup(Messages.getString("PrintReport.notify_summary"),
@@ -127,7 +129,7 @@ public class Download {
                                 + Messages.getString("PrintReport.printer") + printer + "\n\n"
                                 + Messages.getString("PrintReport.title") + title,
                                 GtkStockIcon.get("gtk-print"), 0);
-                        PDFPrint print = new PDFPrint(file, ps);
+                        PDFPrint print = new PDFPrint(file,cp,ps);
                         print.start();
                     } else {
                         showReportDialog(title, file);
@@ -146,8 +148,9 @@ public class Download {
         }
     }
 
-    public static void downloadFile(Config conf,Protocol protocol, JSONObject item)  {
+    public static void downloadFile(Config conf, Protocol protocol, JSONObject item) {
         try {
+            logger.info("downloadFile:" + item.toString());
             if (!item.has("object_id")) {
                 return;
             }

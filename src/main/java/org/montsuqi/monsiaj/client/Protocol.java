@@ -66,14 +66,43 @@ public class Protocol {
     private final String password;
     private boolean usePushClient;
 
-    public boolean isUsePushClient() {
-        return usePushClient;
-    }
+    private int totalExecTime;
+    private int appExecTime;
 
     private SSLSocketFactory sslSocketFactory;
     static final String PANDA_CLIENT_VERSION = "2.0.0";
 
     private int sslType;
+
+    public static final int TYPE_NO_SSL = 0;
+    public static final int TYPE_SSL_NO_CERT = 1;
+    public static final int TYPE_SSL_PKCS12 = 2;
+    public static final int TYPE_SSL_PKCS11 = 3;
+
+    private static final String OS_VERSION = System.getProperty("os.name") + "-" + System.getProperty("os.version");
+    private static final String JAVA_VERSION = "Java_" + System.getProperty("java.version");
+    private static final String MONSIAJ_VERSION = "monsiaj/" + Protocol.class.getPackage().getImplementationVersion();
+    private static final String USER_AGENT = MONSIAJ_VERSION + " (" + OS_VERSION + "; " + JAVA_VERSION + ")";
+
+    private String caCert;
+    private String certFile;
+    private String certFilePassphrase;
+
+    public Protocol(String authURI, final String user, final String pass) throws IOException, GeneralSecurityException {
+        this.rpcId = 1;
+        this.authURI = authURI;
+        this.user = user;
+        this.password = pass;
+        this.serverType = null;
+        this.usePushClient = false;
+        this.sslType = TYPE_NO_SSL;
+        this.totalExecTime = 0;
+        this.appExecTime = 0;
+    }
+
+    public boolean isUsePushClient() {
+        return usePushClient;
+    }
 
     public String getPusherURI() {
         return pusherURI;
@@ -103,23 +132,12 @@ public class Protocol {
         return certFilePassphrase;
     }
 
-    public static final int TYPE_NO_SSL = 0;
-    public static final int TYPE_SSL_NO_CERT = 1;
-    public static final int TYPE_SSL_PKCS12 = 2;
-    public static final int TYPE_SSL_PKCS11 = 3;
+    public int getTotalExecTime() {
+        return totalExecTime;
+    }
 
-    private String caCert;
-    private String certFile;
-    private String certFilePassphrase;
-
-    public Protocol(String authURI, final String user, final String pass) throws IOException, GeneralSecurityException {
-        this.rpcId = 1;
-        this.authURI = authURI;
-        this.user = user;
-        this.password = pass;
-        this.serverType = null;
-        this.usePushClient = false;
-        this.sslType = TYPE_NO_SSL;
+    public int getAppExecTime() {
+        return appExecTime;
     }
 
     public void makeSSLSocketFactory(final String caCert) throws IOException, GeneralSecurityException {
@@ -181,6 +199,9 @@ public class Protocol {
     }
 
     private Object checkJSONRPCResponse(String jsonStr) throws JSONException {
+        totalExecTime = 0;
+        appExecTime = 0;
+
         JSONObject obj = new JSONObject(jsonStr);
         if (!obj.getString("jsonrpc").matches("2.0")) {
             throw new JSONException("invalid jsonrpc version");
@@ -198,7 +219,21 @@ public class Protocol {
         if (!obj.has("result")) {
             throw new JSONException("no result object");
         }
-        return obj.get("result");
+        Object result = obj.get("result");
+        if (result instanceof JSONObject) {
+            JSONObject res = (JSONObject) result;
+            if (res.has("meta")) {
+                JSONObject meta = (JSONObject) ((JSONObject) result).getJSONObject("meta");
+                if (meta.has("total_exec_time")) {
+                    totalExecTime = meta.getInt("total_exec_time");
+                }
+                if (meta.has("app_exec_time")) {
+                    appExecTime = meta.getInt("app_exec_time");
+                }
+            }
+        }
+
+        return result;
     }
 
     private ByteArrayOutputStream getHTTPBody(HttpURLConnection con) throws IOException {
@@ -248,11 +283,7 @@ public class Protocol {
         con.setRequestMethod("POST");
         //          ((HttpsURLConnection) con).setFixedLengthStreamingMode(reqStr.length());
         con.setRequestProperty("Content-Type", "application/json");
-        String osVersion = System.getProperty("os.name") + "-" + System.getProperty("os.version");
-        String javaVersion = "Java_" + System.getProperty("java.version");
-        String monsiajVersion = "monsiaj/" + this.getClass().getPackage().getImplementationVersion();
-        String ua = monsiajVersion + " (" + osVersion + "; " + javaVersion + ")";
-        con.setRequestProperty("User-Agent", ua);
+        con.setRequestProperty("User-Agent", USER_AGENT);
 
         try (OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
             osw.write(reqStr);
@@ -333,16 +364,21 @@ public class Protocol {
         this.rpcURI = result.getString("app_rpc_endpoint_uri");
         this.restURIRoot = result.getString("app_rest_api_uri_root");
         this.pusherURI = System.getProperty("monsia.pusher_uri");
-        if (result.has("pusher_uri")) {
-            String uri = result.getString("pusher_uri");
-            if (uri != null && !uri.isEmpty()) {
-                this.usePushClient = true;
+        if (this.pusherURI == null) {
+            if (result.has("pusher_uri")) {
                 this.pusherURI = result.getString("pusher_uri");
             }
+        }
+        if (this.pusherURI != null && !this.pusherURI.isEmpty()) {
+            this.usePushClient = true;
+        }
+        if (System.getProperty("monsia.disable_push_client") != null) {
+            this.usePushClient = false;
         }
         logger.info("session_id:" + this.sessionId);
         logger.info("rpcURI:" + this.rpcURI);
         logger.info("restURIRoot:" + this.restURIRoot);
+        logger.info("usePushClient:" + this.usePushClient);
         logger.info("pusherURI:" + this.pusherURI);
     }
 
@@ -440,6 +476,7 @@ public class Protocol {
 
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", USER_AGENT);
 
         BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
         int length;
@@ -474,6 +511,7 @@ public class Protocol {
         con.setDoOutput(true);
         //((HttpsURLConnection) con.setFixedLengthStreamingMode(in.length);
         con.setRequestProperty("Content-Type", "application/octet-stream");
+        con.setRequestProperty("User-Agent", USER_AGENT);
         try (OutputStream os = con.getOutputStream()) {
             os.write(in);
             os.flush();

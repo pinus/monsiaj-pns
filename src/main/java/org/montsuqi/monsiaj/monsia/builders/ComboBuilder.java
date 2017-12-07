@@ -52,7 +52,7 @@ class ComboBuilder extends ContainerBuilder {
 	void buildChildren(Interface xml, Container parent, WidgetInfo info) {
 		JComboBox combo = (JComboBox)parent;
 		if (info.getChildren().size() != 1) {
-			throw new WidgetBuildingException("only one child for a Combo");
+			throw new WidgetBuildingException("only one child for a Combo"); 
 		}
 		ChildInfo cInfo = info.getChild(0);
 		WidgetInfo wInfo = cInfo.getWidgetInfo();
@@ -67,8 +67,8 @@ class ComboBuilder extends ContainerBuilder {
 	 * @param actualType the type given in screen definition.
 	 */
 	protected void ensureValidEntryType(String actualType) {
-		if ( ! "Entry".equals(actualType)) {
-			throw new WidgetBuildingException("not a Entry widget");
+		if ( ! "Entry".equals(actualType)) { 
+			throw new WidgetBuildingException("not a Entry widget"); 
 		}
 	}
 }

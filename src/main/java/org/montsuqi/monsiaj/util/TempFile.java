@@ -22,7 +22,7 @@ public class TempFile {
         tempDir = new File(tempDirRoot, UUID.randomUUID().toString());
         tempDir.mkdirs();
     }
-
+    
     private TempFile() {
     }
 
@@ -47,12 +47,12 @@ public class TempFile {
             }
         }
     }
-
+    
     public static File createTempFile(String prefix, String suffix) {
         final String filename = prefix + "_" + UUID.randomUUID().toString() + "_" + suffix;
         return new File(tempDir,filename);
     }
-
+    
     public static void cleanTempDir() {
         if (tempDir.exists()) {
             deleteAll(tempDir);

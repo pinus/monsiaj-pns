@@ -38,7 +38,7 @@ import org.montsuqi.monsiaj.widgets.FileChooserButton;
  */
 class FileChooserButtonHandler extends WidgetHandler {
     static final Logger logger = LogManager.getLogger(FileChooserButtonHandler.class);
-
+    
     @Override
     public void set(UIControl con, Component widget, JSONObject obj, Map styleMap) throws JSONException {
         FileChooserButton fcb = (FileChooserButton) widget;

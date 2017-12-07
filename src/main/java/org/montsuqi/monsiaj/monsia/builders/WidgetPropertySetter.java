@@ -98,7 +98,7 @@ abstract class WidgetPropertySetter {
      */
     static WidgetPropertySetter getSetter(Class clazz, String name) {
         for (/*
-                 *
+                 * 
                  */; clazz != null; clazz = clazz.getSuperclass()) {
             Map map = (Map) propertyMap.get(clazz);
             if (map == null || !map.containsKey(name)) {
@@ -791,7 +791,7 @@ abstract class WidgetPropertySetter {
             }
         });
 
-//		registerProperty(Table.class, "rows", new WidgetPropertySetter() {
+//		registerProperty(Table.class, "rows", new WidgetPropertySetter() { 
 //			void set(Interface xml, Container parent, Component widget, String value) {
 //				Table table = (Table)widget;
 //				TableLayout layout = (TableLayout)table.getLayout();
@@ -799,14 +799,14 @@ abstract class WidgetPropertySetter {
 //			}
 //		});
 //
-//		registerProperty(Table.class, "columns", new WidgetPropertySetter() {
+//		registerProperty(Table.class, "columns", new WidgetPropertySetter() { 
 //			void set(Interface xml, Container parent, Component widget, String value) {
 //				Table table = (Table)widget;
 //				TableLayout layout = (TableLayout)table.getLayout();
 //				layout.setColumns(ParameterConverter.toInteger(value));
 //			}
 //		});
-//		registerProperty(Table.class, "homogeneous", new WidgetPropertySetter() {
+//		registerProperty(Table.class, "homogeneous", new WidgetPropertySetter() { 
 //			void set(Interface xml, Container parent, Component widget, String value) {
 //				Table table = (Table)widget;
 //				TableLayout tl = (TableLayout)table.getLayout();
@@ -814,7 +814,7 @@ abstract class WidgetPropertySetter {
 //			}
 //		});
 //
-//		registerProperty(Table.class, "row_spacing", new WidgetPropertySetter() {
+//		registerProperty(Table.class, "row_spacing", new WidgetPropertySetter() { 
 //			void set(Interface xml, Container parent, Component widget, String value) {
 //				Table table = (Table)widget;
 //				TableLayout tl = (TableLayout)table.getLayout();
@@ -822,7 +822,7 @@ abstract class WidgetPropertySetter {
 //			}
 //		});
 //
-//		registerProperty(Table.class, "column_spacing", new WidgetPropertySetter() {
+//		registerProperty(Table.class, "column_spacing", new WidgetPropertySetter() { 
 //			void set(Interface xml, Container parent, Component widget, String value) {
 //				Table table = (Table)widget;
 //				TableLayout tl = (TableLayout)table.getLayout();

@@ -31,7 +31,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
 
 /** <p>A class that simulates Gtk+'s HSeparator(horizontal separator).</p>
- *
+ * 
  * <p>This class simulates Gtk+'s separator by displacing vertical location.</p>
  */
 public class HSeparator extends JSeparator {

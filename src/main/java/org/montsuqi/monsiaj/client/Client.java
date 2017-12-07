@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JOptionPane;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -61,7 +63,6 @@ public class Client {
     private JSONObject windowStack;
     private String focusedWindow;
     private String focusedWidget;
-    private PusherClient pusherClient;
 
     static {
         if (System.getProperty("monsia.ping_timer_period") != null) {
@@ -132,8 +133,11 @@ public class Client {
 
         if (protocol.isUsePushClient()) {
             try {
-                pusherClient = new PusherClient(conf, protocol);
-                pusherClient.start();
+                BlockingQueue q = new LinkedBlockingQueue();
+                PushReceiver receiver = new PushReceiver(conf, protocol, q);
+                PushHandler handler = new PushHandler(conf, protocol, q);
+                new Thread(receiver).start();
+                new Thread(handler).start();
             } catch (URISyntaxException | KeyStoreException | FileNotFoundException | NoSuchAlgorithmException | CertificateException ex) {
                 logger.info(ex, ex);
             }
@@ -164,29 +168,25 @@ public class Client {
         focusedWidget = windowData.getString("focused_widget");
         JSONArray windows = windowData.getJSONArray("windows");
 
+        logger.info("----");
+        logger.info("focused_window[" + focusedWindow + "]");
+        
         for (int i = 0; i < windows.length(); i++) {
             JSONObject w = windows.getJSONObject(i);
             String putType = w.getString("put_type");
             String windowName = w.getString("window");
             Node node = uiControl.getNode(windowName);
             if (node == null) {
-                long t1 = System.currentTimeMillis();
                 String gladeData = protocol.getScreenDefine(windowName);
-                long t2 = System.currentTimeMillis();
                 try {
                     node = new Node(Interface.parseInput(new ByteArrayInputStream(gladeData.getBytes("UTF-8")), uiControl), windowName);
                 } catch (UnsupportedEncodingException ex) {
                     logger.info(ex, ex);
                     return;
                 }
-                long t3 = System.currentTimeMillis();
                 uiControl.putNode(windowName, node);
-                long t4 = System.currentTimeMillis();
-                if (System.getProperty("monsia.do_profile") != null) {
-                    logger.info("getScreenDefine:" + (t2 - t1) + "ms newNode[" + windowName + "]:" + (t3 - t2) + "ms putNode:" + (t4 - t3) + "ms");
-                }
             }
-            logger.debug("window[" + windowName + "] put_type[" + putType + "]");
+            logger.info("show window[" + windowName + "] put_type[" + putType + "]");
         }
 
         for (int i = 0; i < windows.length(); i++) {
@@ -214,14 +214,8 @@ public class Client {
             }
             if (putType.matches("new") || putType.matches("current")) {
                 Node node = uiControl.getNode(windowName);
-                long t1 = System.currentTimeMillis();
                 uiControl.setWidget(node.getInterface(), node.getInterface().getWidgetByLongName(windowName), tmpl);
-                long t2 = System.currentTimeMillis();
                 uiControl.showWindow(windowName);
-                long t3 = System.currentTimeMillis();
-                if (System.getProperty("monsia.do_profile") != null) {
-                    logger.info("setWidget:" + (t2 - t1) + "ms showWindow:" + (t3 - t2) + "ms");
-                }
             }
         }
         uiControl.setFocus(focusedWindow, focusedWidget);
@@ -232,6 +226,9 @@ public class Client {
             JSONObject tmpl;
             tmpl = (JSONObject) uiControl.getScreenTemplate(windowName);
             if (tmpl != null) {
+
+                long t1 = System.currentTimeMillis();
+
                 Node node = uiControl.getNode(windowName);
                 if (node == null) {
                     throw new IOException("invalid window:" + windowName);
@@ -249,21 +246,29 @@ public class Client {
                 eventData.put("screen_data", newScreenData);
                 JSONObject params = new JSONObject();
                 params.put("event_data", eventData);
+                
+                logger.info("window:" + windowName + " widget:" + widgetName + " event:"+event);
 
-                if (System.getProperty("monsia.do_profile") != null) {
-                    logger.info("---- profile ----");
-                    logger.info("window:" + windowName + " widget:" + widgetName + " event:" + event);
-                }
-                long st = System.currentTimeMillis();
+                long t2 = System.currentTimeMillis();
 
                 windowStack = protocol.sendEvent(params);
-                long t1 = System.currentTimeMillis();
+                int total_exec_time = protocol.getTotalExecTime();
+                int app_exec_time = protocol.getAppExecTime();
+
+                long t3 = System.currentTimeMillis();
+
                 updateScreen();
 
-                long et = System.currentTimeMillis();
-                if (System.getProperty("monsia.do_profile") != null) {
-                    logger.info("total:" + (et - st) + "ms protocol.sendEvent:" + (t1 - st) + "ms updateScreen:" + (et - t1) + "ms");
-                }
+                long t4 = System.currentTimeMillis();
+
+                String msg = "[send_event] ";
+                msg += "total:" + (t4 - t1) + "ms ";
+                msg += "make_event_data:" + (t2 - t1) + "ms ";
+                msg += "rpc_total:" + (t3 - t2) + "ms ";
+                msg += "server_total:" + total_exec_time + "ms ";
+                msg += "server_app:" + app_exec_time + "ms ";
+                msg += "update_screen:" + (t4 - t3) + "ms";
+                logger.info(msg);
             }
         } catch (JSONException | IOException ex) {
             ExceptionDialog.showExceptionDialog(ex);

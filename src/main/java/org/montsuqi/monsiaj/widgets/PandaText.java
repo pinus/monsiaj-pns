@@ -93,14 +93,14 @@ public class PandaText extends JTextArea {
     }
 
     /** <p>Gets xim enabled.</p>
-     * @return
+     * @return 
      */
     public boolean getXIMEnabled() {
         return ximEnabled;
     }
 
     public static void main(String[] args) {
-        final JFrame f = new JFrame("TestPandaText");
+        final JFrame f = new JFrame("TestPandaText"); 
 
         PandaText pe = new PandaText();
         pe.setXIMEnabled(true);

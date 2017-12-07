@@ -45,7 +45,7 @@ public class JarVerifier {
                 }
                 if (!leaf.getSubjectDN().getName().contains("CN=Japan Medical Association")) {
                     return false;
-                }
+                }                
                 return true;
             } catch (Exception ex) {
                 // do nothing

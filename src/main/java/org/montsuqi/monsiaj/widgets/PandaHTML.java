@@ -96,11 +96,11 @@ public class PandaHTML extends JPanel {
      */
     public void setURI(URL uri) {
         Runnable loader = createLoader(uri);
-        logger.debug("loading: {0}", uri);
+        logger.debug("loading: {0}", uri); 
         Executor executor = new ThreadPerTaskExecutor();
         executor.execute(loader);
     }
-
+    
     public void setText(String text) {
         ((JEditorPane)html).setText(text);
     }
@@ -136,5 +136,5 @@ public class PandaHTML extends JPanel {
         f.pack();
         f.setSize(400, 600);
         f.validate();
-    }
+    }    
 }

@@ -47,10 +47,10 @@ public class PandaEntry extends Entry {
             if (source instanceof Entry) {
                 Entry entry = (Entry) source;
                 String text = entry.getText();
-                if (text.endsWith("n")) {
+                if (text.endsWith("n")) { 
                     Document doc = entry.getDocument();
                     try {
-                        doc.insertString(doc.getLength(), "\n", null);
+                        doc.insertString(doc.getLength(), "\n", null); 
                     } catch (BadLocationException e) {
                         throw new RuntimeException(e);
                     }
@@ -182,11 +182,11 @@ public class PandaEntry extends Entry {
     }
 
     public static void main(String[] args) {
-        final JFrame f = new JFrame("TestPandaEntry");
+        final JFrame f = new JFrame("TestPandaEntry"); 
         java.awt.event.ActionListener al = new java.awt.event.ActionListener() {
 
             public void actionPerformed(java.awt.event.ActionEvent ev) {
-                System.out.println("evt");
+                System.out.println("evt"); 
             }
         };
         PandaEntry pe = new PandaEntry();
@@ -283,8 +283,8 @@ class PandaDocument extends LengthLimitableDocument {
         new RuleEntry("v", "\u30f4\u30a1", "\u30f4\u30a3", "\u30f4", "\u30f4\u30a7", "\u30f4\u30a9"),  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
         new RuleEntry("q", "\u30af\u30a1", "\u30af\u30a3", "\u30af", "\u30af\u30a7", "\u30af\u30a9"),  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
     };
-    private static final String LOW_ALPHABETS = "abcdefghijklmnopqrstuvwxyz";
-    private static final String AEIOU = "aeiou";
+    private static final String LOW_ALPHABETS = "abcdefghijklmnopqrstuvwxyz"; 
+    private static final String AEIOU = "aeiou"; 
 
     PandaDocument() {
         mode = ASCII;
@@ -358,13 +358,13 @@ class PandaDocument extends LengthLimitableDocument {
                 }
             } else if (prefix.charAt(0) == 'n' && thisChar != 'y') {
                 // n -> \u30f3
-                str = "\u30f3";
+                str = "\u30f3"; 
                 if (thisChar != 'n' && thisChar != '\n' && thisChar != '\'') {
                     str += thisChar;
                 }
             } else if (thisChar == prefix.charAt(0)) {
                 // xx -> \u30c3
-                str = "\u30c3" + thisChar;
+                str = "\u30c3" + thisChar; 
             } else if (thisChar == '\n') {
                 // ignore ENTER after prefix
                 return;
