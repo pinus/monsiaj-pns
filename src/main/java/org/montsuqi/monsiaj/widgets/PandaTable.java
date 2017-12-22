@@ -425,7 +425,7 @@ public class PandaTable extends JTable {
      * pns 実データの行数を返す
      * @return
      */
-    private int getRealRowCount() {
+    public int getRealRowCount() {
         int realRowCount = 0;
         // 最終行からスキャンして，実データを見つけた時点で行数とする
         for (int r=getRowCount()-1; r>=0; r--) {

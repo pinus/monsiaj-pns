@@ -42,7 +42,7 @@ import org.montsuqi.monsiaj.widgets.PandaTable;
 class PandaTableHandler extends WidgetHandler {
 
     private static final List<String> widgetList;
-    private static int editingRow; //pns 編集中の行
+    private int editingRow; //pns 編集中の行
 
     static {
         widgetList = new ArrayList<>();
@@ -131,11 +131,19 @@ class PandaTableHandler extends WidgetHandler {
         if (trow >= 0 && tcolumn >= 0) {
 
             //pns 編集中の行があれば選択を変えない begins
-            //pns (K98)診療行為一覧選択サブから戻ったときに editingRow が 0 にリセットされてしまうのの workaround 入れた
-            if (editingRow != -1 && con.getTopWindow().getTitle().equals("読み込み中...")) {
-                // ただし最後の行の編集であれば，selectedRow を１つ下に送る
-                if (trow == editingRow + 1) { trow = editingRow + 1; }
-                else if (trow > editingRow) { trow = editingRow; }
+            int realRowCount = table.getRealRowCount();
+            // 消去されたとき
+            if (realRowCount == 0) { editingRow = 0; }
+
+            if (editingRow == 0 && trow == realRowCount && ! con.getTopWindow().getTitle().equals("読み込み中...")) {
+                // 最初に入ってきたとき
+                trow = 0;
+                editingRow = 0;
+            } else {
+                // 最後の行の編集であれば，selectedRow を１つ下に送る
+                if (realRowCount == editingRow + 1) { trow = realRowCount; }
+                // そうでなければ行を移動しない
+                else { trow = editingRow; }
             }
             //pns ends
 
