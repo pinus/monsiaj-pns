@@ -193,8 +193,8 @@ public class PandaTable extends JTable {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     PandaTable.this.setEnterPressed(true);
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN
-                        || e.getKeyCode() == KeyEvent.VK_UP
-                        || e.getKeyCode() == KeyEvent.VK_TAB) {
+                    || e.getKeyCode() == KeyEvent.VK_UP
+                    || e.getKeyCode() == KeyEvent.VK_TAB) {
                     Component parent = ((Component) e.getSource()).getParent();
                     KeyEvent pass = new KeyEvent(parent, e.getID(), e.getWhen(), e.getModifiers(), e.getKeyCode(), e.getKeyChar());
                     parent.dispatchEvent(pass);
@@ -266,6 +266,9 @@ public class PandaTable extends JTable {
     //pns 選択が起きたら必ず編集する
     @Override
     public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) {
+        //pns 空行への changeSelection は拒否る
+        if (getRealRowCount() < rowIndex) { return; }
+
         super.changeSelection(rowIndex, columnIndex, toggle, extend);
         if (isEditing()) {
             // selection が変わったので前の editor は消す
@@ -349,7 +352,7 @@ public class PandaTable extends JTable {
 
     public void setFGColor(int row, int column, String _color) {
         if (0 <= row && row < model.getRowCount()
-                && 0 <= column && column < model.getColumnCount()) {
+            && 0 <= column && column < model.getColumnCount()) {
             Color color = SafeColorDecoder.decode(_color);
             fgColors[row][column] = color != null ? color : Color.BLACK;
         }
@@ -357,7 +360,7 @@ public class PandaTable extends JTable {
 
     public void setBGColor(int row, int column, String _color) {
         if (0 <= row && row < model.getRowCount()
-                && 0 <= column && column < model.getColumnCount()) {
+            && 0 <= column && column < model.getColumnCount()) {
             Color color = SafeColorDecoder.decode(_color);
             bgColors[row][column] = color != null ? color : Color.WHITE;
         }
@@ -381,7 +384,7 @@ public class PandaTable extends JTable {
 
     @Override
     public Component prepareRenderer(
-            TableCellRenderer renderer, int row, int column) {
+        TableCellRenderer renderer, int row, int column) {
         Component c = super.prepareRenderer(renderer, row, column);
         if (fgColors != null) {
             c.setForeground(fgColors[row][column]);
@@ -390,6 +393,50 @@ public class PandaTable extends JTable {
             c.setBackground(bgColors[row][column]);
         }
         return c;
+    }
+
+    /**
+     * pns サーバから帰ってくるデータの行数が，実データの有無にかかわらず常に400行なので，
+     * 実データのある必要行数だけ表示するようにする
+     * @return
+     */
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension size = super.getPreferredSize();
+
+        int realRowCount = getRealRowCount();
+
+        // 実データを表示するのに必要な高さ
+        size.height = (realRowCount + 1) * getRowHeight();
+
+        // 親が Viewport であれば，その高さよりも小さくならないようにする
+        Object parent = getParent();
+        if (parent != null && (parent instanceof JViewport)) {
+            JViewport view = (JViewport) parent;
+            if (size.height < view.getHeight()) {
+                size.height = view.getHeight();
+            }
+        }
+
+        return size;
+    }
+
+    /**
+     * pns 実データの行数を返す
+     * @return
+     */
+    public int getRealRowCount() {
+        int realRowCount = 0;
+        // 最終行からスキャンして，実データを見つけた時点で行数とする
+        for (int r=getRowCount()-1; r>=0; r--) {
+            // columm 1 に何か入っていれば実データである
+            Object value = model.getValueAt(r, 1);
+            if (value != null && !"".equals(((String)value).trim())) {
+                realRowCount = r + 1;
+                break;
+            }
+        }
+        return realRowCount;
     }
 
     public static void main(String[] args) {

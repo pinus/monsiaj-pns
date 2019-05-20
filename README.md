@@ -2,7 +2,7 @@
 monsiaj をカスタマイズしたもの。
 
 ## カスタマイズ内容 ##
-monsiaj version 2.0.4 を元にカスタマイズした。
+monsiaj version 2.0.15 を元にカスタマイズした。
 
 ### org.montsuqi.mosiaj.client.widgethandlers.PandaTableHandler ###
 (K02)診療行為入力画面で編集を行ってリターンキーを押した後，セルの選択が残るようにした。
