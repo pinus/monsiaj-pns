@@ -13,7 +13,7 @@ import javax.swing.ImageIcon;
  * @author mihara
  */
 public class GtkStockIcon {
-    
+
     static public Icon get(final String iconName) {
         URL url = GtkStockIcon.class.getResource("/images/stock-icons/" + iconName + ".png");
         if (url == null) {

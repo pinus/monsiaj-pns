@@ -32,10 +32,10 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 /** <p>A class to simulate Gtk+'s Entry widget.</p>
- * 
+ *
  * <p>Down arrow key moves focus out to the next component, and
  * up arrow key moves focus out to the previous component respectively.</p>
- * 
+ *
  * <p>This component uses LengthLimitableDocument by default and length of
  * the text can be set.</p>
  */
@@ -59,11 +59,11 @@ public class Entry extends JTextField {
 		ActionMap actions = getActionMap();
 		InputMap inputs = getInputMap();
 
-		actions.put("focusOutNext", new FocusOutNextAction()); 
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext"); 
+		actions.put("focusOutNext", new FocusOutNextAction());
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext");
 
-		actions.put("focusOutPrevious", new FocusOutPreviousAction()); 
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious"); 
+		actions.put("focusOutPrevious", new FocusOutPreviousAction());
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious");
 		addFocusListener(new EntryFocusListener());
 	}
 
@@ -88,6 +88,6 @@ public class Entry extends JTextField {
        public void focusLost(final FocusEvent e) {
     	   JTextField tf = (JTextField)e.getSource();
             tf.setCaretPosition(0);
-       }        
+       }
     }
 }

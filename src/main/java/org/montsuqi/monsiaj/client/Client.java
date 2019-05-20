@@ -24,15 +24,13 @@ package org.montsuqi.monsiaj.client;
 
 import org.montsuqi.monsiaj.util.Messages;
 import java.awt.event.ActionEvent;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Calendar;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JOptionPane;
@@ -58,24 +56,13 @@ public class Client {
     private static final Logger logger = LogManager.getLogger(Client.class);
     private Protocol protocol;
     private final UIControl uiControl;
-    private static final int PING_TIMER_PERIOD;
+    private static final int DEFAULT_PING_TIMER_PERIOD = 7 * 1000;
+    private static final int PUSH_CLIENT_PING_TIMER_PERIOD = 180 * 1000;
     private javax.swing.Timer pingTimer;
     private JSONObject windowStack;
     private String focusedWindow;
     private String focusedWidget;
-
-    static {
-        if (System.getProperty("monsia.ping_timer_period") != null) {
-            int period = Integer.parseInt(System.getProperty("monsia.ping_timer_period")) * 1000;
-            if (period < 1000) {
-                PING_TIMER_PERIOD = 7 * 1000;
-            } else {
-                PING_TIMER_PERIOD = period;
-            }
-        } else {
-            PING_TIMER_PERIOD = 7 * 1000;
-        }
-    }
+    private PushReceiver pushReceiver;
 
     public Client(Config conf) throws IOException {
         this.conf = conf;
@@ -86,6 +73,7 @@ public class Client {
         }
         uiControl = new UIControl(this, conf.getStyleURL(n), delay);
         isReceiving = false;
+        pushReceiver = null;
     }
 
     void connect() throws IOException, GeneralSecurityException, JSONException {
@@ -99,7 +87,7 @@ public class Client {
             authURI = "http://" + authURI;
         }
         logger.info("try connect " + authURI);
-        protocol = new Protocol(authURI, conf.getUser(num), conf.getPassword(num));
+        protocol = new Protocol(authURI, conf.getUser(num), conf.getPassword(num), conf.getUseSSO(num));
         if (conf.getUseSSL(num)) {
             if (conf.getUsePKCS11(num)) {
                 protocol.makeSSLSocketFactoryPKCS11(conf.getCACertificateFile(num), conf.getPKCS11Lib(num), conf.getPKCS11Slot(num));
@@ -121,25 +109,64 @@ public class Client {
             conf.setUser(num, "");
             conf.save();
         }
+        if (conf.getUseSSL(num)) {
+            CertificateManager cert = new CertificateManager(conf.getClientCertificateFile(num), conf.getClientCertificatePassword(num));
+            if (cert.isExpire()) {
+                String message = Messages.getString("Client.expire_certificate");
+                JOptionPane.showMessageDialog(uiControl.getTopWindow(), message);
+                System.exit(1);
+            }
+            if (cert.isExpireApproaching()) {
+                Calendar notAfter = cert.getNotAfter();
+                String format = Messages.getString("Client.certificate_expiration_is_approaching");
+                String alert = String.format(format, notAfter, notAfter, notAfter, notAfter, notAfter, notAfter, notAfter);
+                String title = Messages.getString("Client.update_certificate_confirm_dialog_title");
+                int result = JOptionPane.showConfirmDialog(null, alert, title, JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    cert.setSSLSocketFactory(protocol.getSSLSocketFactory());
+                    cert.setAuthURI(authURI);
+                    cert.updateCertificate();
+                    conf.setClientCertificateFile(num, cert.getFileName());
+                    if (conf.getSaveClientCertificatePassword(num)) {
+                        conf.setClientCertificatePassword(num, cert.getPassword());
+                    }
+                    conf.save();
+                    String message = Messages.getString("Client.success_update_certificate");
+                    JOptionPane.showMessageDialog(uiControl.getTopWindow(), message);
+                }
+            }
+        }
 
-        protocol.getServerInfo();
-        protocol.startSession();
+        try {
+            protocol.startSession();
+        } catch (LoginFailureException e) {
+            JOptionPane.showMessageDialog(uiControl.getTopWindow(), Messages.getString("Client.openid_connect.login_failure"));
+            System.exit(1);
+        }
         logger.info("connected session_id:" + protocol.getSessionId());
         startReceiving();
         windowStack = protocol.getWindow();
         updateScreen();
         stopReceiving();
-        startPing();
 
-        if (protocol.isUsePushClient()) {
+        if (protocol.enablePushClient()) {
             try {
                 BlockingQueue q = new LinkedBlockingQueue();
-                PushReceiver receiver = new PushReceiver(conf, protocol, q);
+                pushReceiver = new PushReceiver(protocol, q);
                 PushHandler handler = new PushHandler(conf, protocol, q);
-                new Thread(receiver).start();
+                new Thread(pushReceiver).start();
                 new Thread(handler).start();
             } catch (URISyntaxException | KeyStoreException | FileNotFoundException | NoSuchAlgorithmException | CertificateException ex) {
                 logger.info(ex, ex);
+            }
+        }
+        startPing();
+        if (conf.getShowStartupMessage(num)) {
+            String msg = protocol.getStartupMessage();
+            if (msg != null && !msg.isEmpty()) {
+                PopupNotify.popup(Messages.getString("PushHandler.announcement"),
+                        msg,
+                        GtkStockIcon.get("gtk-dialog-info"), 30);
             }
         }
     }
@@ -147,6 +174,7 @@ public class Client {
     void disconnect() {
         try {
             protocol.endSession();
+            pushReceiver.stop();
             logger.info("disconnect session_id:" + protocol.getSessionId());
         } catch (IOException | JSONException e) {
             logger.warn(e, e);
@@ -156,7 +184,14 @@ public class Client {
     }
 
     public void startPing() {
-        pingTimer = new javax.swing.Timer(PING_TIMER_PERIOD, (ActionEvent e) -> {
+        int period = DEFAULT_PING_TIMER_PERIOD;
+        if (protocol.enablePushClient()) {
+            period = PUSH_CLIENT_PING_TIMER_PERIOD;
+        }
+        if (System.getProperty("monsia.ping_timer_period") != null) {
+            period = Integer.parseInt(System.getProperty("monsia.ping_timer_period")) * 1000;
+        }
+        pingTimer = new javax.swing.Timer(period, (ActionEvent e) -> {
             sendPing();
         });
         pingTimer.start();
@@ -170,7 +205,7 @@ public class Client {
 
         logger.info("----");
         logger.info("focused_window[" + focusedWindow + "]");
-        
+
         for (int i = 0; i < windows.length(); i++) {
             JSONObject w = windows.getJSONObject(i);
             String putType = w.getString("put_type");
@@ -214,7 +249,9 @@ public class Client {
             }
             if (putType.matches("new") || putType.matches("current")) {
                 Node node = uiControl.getNode(windowName);
-                uiControl.setWidget(node.getInterface(), node.getInterface().getWidgetByLongName(windowName), tmpl);
+                if (windowName.equals(focusedWindow)) {
+                    uiControl.setWidget(node.getInterface(), node.getInterface().getWidgetByLongName(windowName), tmpl);
+                }
                 uiControl.showWindow(windowName);
             }
         }
@@ -246,8 +283,8 @@ public class Client {
                 eventData.put("screen_data", newScreenData);
                 JSONObject params = new JSONObject();
                 params.put("event_data", eventData);
-                
-                logger.info("window:" + windowName + " widget:" + widgetName + " event:"+event);
+
+                logger.info("window:" + windowName + " widget:" + widgetName + " event:" + event);
 
                 long t2 = System.currentTimeMillis();
 
@@ -327,7 +364,8 @@ public class Client {
         try {
             if (!isReceiving()) {
                 startReceiving();
-                if (!this.getProtocol().isUsePushClient()) {
+                logger.debug("sendPing");
+                if (!protocol.enablePushClient()) {
                     listDownloads();
                 }
                 getMessage();

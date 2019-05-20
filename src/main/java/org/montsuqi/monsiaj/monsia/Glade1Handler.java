@@ -74,11 +74,11 @@ public class Glade1Handler extends AbstractDocumentHandler {
             Map widgetProperties = w.getProperties();
             if (widgetProperties.containsKey("x")) {
                 childInfo.addProperty("x", (String) widgetProperties.get("x"));  //$NON-NLS-2$
-                //widgetProperties.remove("x"); 
+                //widgetProperties.remove("x");
             }
             if (widgetProperties.containsKey("y")) {
                 childInfo.addProperty("y", (String) widgetProperties.get("y"));  //$NON-NLS-2$
-                //widgetProperties.remove("y"); 
+                //widgetProperties.remove("y");
             }
         }
 

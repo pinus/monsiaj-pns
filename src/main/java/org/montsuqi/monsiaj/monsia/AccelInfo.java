@@ -29,7 +29,7 @@ package org.montsuqi.monsiaj.monsia;
 public class AccelInfo {
 
 	/** <p></p>
-	 * 
+	 *
 	 * @param key key code
 	 * @param modifiers modifiers(OR-ed)
 	 * @param signal signal name.

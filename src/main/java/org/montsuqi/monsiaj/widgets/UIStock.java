@@ -122,7 +122,7 @@ public class UIStock {
      * Returns a ui stock named <var>key</var>.</p>
      *
      * @param key the key to look up the ui stock for.
-     * @return 
+     * @return
      */
     public static UIStock get(String key) {
         if (!stocks.containsKey(key)) {

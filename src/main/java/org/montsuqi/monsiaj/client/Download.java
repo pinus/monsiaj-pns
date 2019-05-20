@@ -39,7 +39,6 @@ import org.montsuqi.monsiaj.widgets.PandaPreview;
  * @author mihara
  */
 public class Download {
-
     private static final Logger logger = LogManager.getLogger(Download.class);
 
     private static void showReportDialog(String title, File file) throws IOException {
@@ -129,8 +128,7 @@ public class Download {
                                 + Messages.getString("PrintReport.printer") + printer + "\n\n"
                                 + Messages.getString("PrintReport.title") + title,
                                 GtkStockIcon.get("gtk-print"), 0);
-                        PDFPrint print = new PDFPrint(file,cp,ps);
-                        print.start();
+                        PDFPrint.print(file,cp,ps);
                     } else {
                         showReportDialog(title, file);
                     }
@@ -148,7 +146,7 @@ public class Download {
         }
     }
 
-    public static void downloadFile(Config conf, Protocol protocol, JSONObject item) {
+    public static void downloadFile(Config conf,Protocol protocol, JSONObject item)  {
         try {
             logger.info("downloadFile:" + item.toString());
             if (!item.has("object_id")) {

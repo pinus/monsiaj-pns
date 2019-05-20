@@ -67,9 +67,9 @@ class Option {
 		Class type = value.getClass();
 		if (type == Boolean.class) {
 			if (((Boolean)value).booleanValue()) {
-				return "ON"; 
+				return "ON";
 			}
-			return "OFF"; 
+			return "OFF";
 		}
 		return value.toString();
 	}
@@ -104,7 +104,7 @@ class Option {
 
 	void setValue(boolean arg) {
 		if (value.getClass() != Boolean.class) {
-			throw new IllegalArgumentException("option type mismatch"); 
+			throw new IllegalArgumentException("option type mismatch");
 		}
 		value = Boolean.valueOf(arg);
 
@@ -112,7 +112,7 @@ class Option {
 
 	void setValue(int value) {
 		if (this.value.getClass() != Integer.class) {
-			throw new IllegalArgumentException("option type mismatch"); 
+			throw new IllegalArgumentException("option type mismatch");
 		}
 		this.value = new Integer(value);
 	}

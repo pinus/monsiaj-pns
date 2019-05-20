@@ -59,11 +59,11 @@ class FixedBuilder extends ContainerBuilder {
             int y = 0;
             child = buildWidget(xml, wInfo, parent);
             Map properties = cInfo.getProperties();
-            if (properties.containsKey("x")) { 
-                x = ParameterConverter.toInteger((String) properties.get("x")); 
+            if (properties.containsKey("x")) {
+                x = ParameterConverter.toInteger((String) properties.get("x"));
             }
-            if (properties.containsKey("y")) { 
-                y = ParameterConverter.toInteger((String) properties.get("y")); 
+            if (properties.containsKey("y")) {
+                y = ParameterConverter.toInteger((String) properties.get("y"));
             }
 
             // Since JTable itself does not have capability to scroll,

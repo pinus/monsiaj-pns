@@ -173,6 +173,7 @@ public class PopupNotify {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     dialog.setOpacity(0.5f);
+                    dialog.toBack();
                 }
 
                 @Override

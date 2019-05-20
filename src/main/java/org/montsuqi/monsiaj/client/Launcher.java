@@ -51,6 +51,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,7 +97,9 @@ public class Launcher {
 
     private void installLookAndFeels() {
         try {
-            UIManager.installLookAndFeel("Nimrod", "com.nilo.plaf.nimrod.NimRODLookAndFeel");
+            if (System.getProperty("monsia.use.loader") == null) {
+                UIManager.installLookAndFeel("Nimrod", "com.nilo.plaf.nimrod.NimRODLookAndFeel");
+            }
             UIManager.installLookAndFeel("InfoNode", "net.infonode.gui.laf.InfoNodeLookAndFeel");
         } catch (Exception e) {
             logger.catching(Level.WARN, e);
@@ -259,10 +262,11 @@ public class Launcher {
         final ConfigViewer viewer = createConfigurationViewer();
         container.add(mainPanel, BorderLayout.CENTER);
 
-        URL iconURL = getClass().getResource("/images/orca.png");
+        URL iconURL = getClass().getResource("/images/orcamo.png");
         f.setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
         JLabel iconLabel = new JLabel("", createIcon(), JLabel.CENTER);
+        iconLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
         container.add(iconLabel, BorderLayout.WEST);
 
         JPanel bar = new JPanel();
@@ -346,7 +350,7 @@ public class Launcher {
     }
 
     protected Icon createIcon() {
-        URL iconURL = getClass().getResource("/images/jma_receipt.png");
+        URL iconURL = getClass().getResource("/images/orcamo-logo.png");
         if (iconURL != null) {
             return new ImageIcon(iconURL);
         }

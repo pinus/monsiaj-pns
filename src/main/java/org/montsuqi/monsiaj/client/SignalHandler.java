@@ -167,8 +167,8 @@ public abstract class SignalHandler {
                 if (timerTask != null) {
                     timerTask.cancel();
                     timerTask = null;
-                }                
-                widget.requestFocusInWindow();                
+                }
+                widget.requestFocusInWindow();
                 blockChangedHandlers();
                 con.sendEvent(widget, userData);
                 unblockChangedHandlers();
@@ -190,7 +190,7 @@ public abstract class SignalHandler {
         registerHandler("click_column", changed);
         registerHandler("day_selected", changed);
         registerHandler("switch_page", changed);
-        registerHandler("no_switch_page", changed);        
+        registerHandler("no_switch_page", changed);
 
         /**
          * <p>
@@ -256,8 +256,8 @@ public abstract class SignalHandler {
 
         registerHandler("send_event", sendEvent);
         registerHandler("send_event_when_idle", sendEventWhenIdle);
-        registerHandler("send_event_on_focus_out", sendEvent);      
-        
+        registerHandler("send_event_on_focus_out", sendEvent);
+
         /**
          * <p>
          * A signal handler which registers the taret widget as "changed" and

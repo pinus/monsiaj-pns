@@ -27,6 +27,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Authenticator;
@@ -35,6 +36,7 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.Proxy;
 import java.security.GeneralSecurityException;
+import java.util.Base64;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
@@ -53,24 +55,28 @@ public class Protocol {
 
     static final Logger logger = LogManager.getLogger(Protocol.class);
     // jsonrpc
-    private String protocolVersion;
-    private String applicationVersion;
-    private String serverType;
     private int rpcId;
     private String sessionId;
+    private String tenantId;
+    private String groupId;
     private String rpcURI;
     private String restURIRoot;
     private String pusherURI;
-    private final String authURI;
+    private String authURI;
+    private String startupMessage;
     private final String user;
     private final String password;
     private boolean usePushClient;
+    private final boolean useSSO;
+    private String protocolVersion;
+    private String applicationVersion;
+    private String serverType;
 
     private int totalExecTime;
     private int appExecTime;
 
     private SSLSocketFactory sslSocketFactory;
-    static final String PANDA_CLIENT_VERSION = "2.0.0";
+    static final String PANDA_CLIENT_VERSION = "2.0.1";
 
     private int sslType;
 
@@ -88,20 +94,38 @@ public class Protocol {
     private String certFile;
     private String certFilePassphrase;
 
-    public Protocol(String authURI, final String user, final String pass) throws IOException, GeneralSecurityException {
+    private String openid_connect_rp_cookie = "";
+
+    public Protocol(String authURI, final String user, final String pass, boolean useSSO) throws IOException, GeneralSecurityException {
         this.rpcId = 1;
         this.authURI = authURI;
         this.user = user;
         this.password = pass;
-        this.serverType = null;
         this.usePushClient = false;
         this.sslType = TYPE_NO_SSL;
         this.totalExecTime = 0;
         this.appExecTime = 0;
+        this.tenantId = null;
+        this.groupId = null;
+        this.startupMessage = null;
+        this.useSSO = useSSO;
+        this.serverType = "";
     }
 
-    public boolean isUsePushClient() {
+    public boolean enablePushClient() {
         return usePushClient;
+    }
+
+    public String getStartupMessage() {
+        return startupMessage;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public String getGroupId() {
+        return groupId;
     }
 
     public String getPusherURI() {
@@ -140,6 +164,10 @@ public class Protocol {
         return appExecTime;
     }
 
+    public SSLSocketFactory getSSLSocketFactory() {
+        return sslSocketFactory;
+    }
+
     public void makeSSLSocketFactory(final String caCert) throws IOException, GeneralSecurityException {
         if (caCert == null || caCert.isEmpty()) {
             sslSocketFactory = null;
@@ -168,22 +196,19 @@ public class Protocol {
 
     private HttpURLConnection getHttpURLConnection(String strURL) throws IOException {
         URL url = new URL(strURL);
+        return getHttpURLConnection(url);
+    }
+
+    private HttpURLConnection getHttpURLConnection(URL url) throws IOException {
         HttpURLConnection con = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
 
-        if (strURL.startsWith("https")) {
+        if (url.getProtocol().equals("https")) {
             if (sslSocketFactory != null) {
                 ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
             }
         }
-        if (strURL.equals(authURI)) {
-            Authenticator.setDefault(new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(user, password.toCharArray());
-                }
-            });
-        } else {
-            Authenticator.setDefault(null);
+        if (!serverType.equals("ginbee")) {
+            setAuthHeader(con);
         }
         return con;
     }
@@ -232,41 +257,42 @@ public class Protocol {
                 }
             }
         }
-
         return result;
     }
 
-    private ByteArrayOutputStream getHTTPBody(HttpURLConnection con) throws IOException {
-        try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-            try (BufferedOutputStream bos = new BufferedOutputStream(bytes)) {
-                BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
+    public static ByteArrayOutputStream getHTTPBody(HttpURLConnection con) {
+        try ( ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+            try ( BufferedOutputStream bos = new BufferedOutputStream(bytes)) {
+                InputStream stream;
+                try {
+                    stream = con.getInputStream();
+                } catch (IOException e) {
+                    stream = con.getErrorStream();
+                }
+                BufferedInputStream bis = new BufferedInputStream(stream);
                 int length;
                 while ((length = bis.read()) != -1) {
                     bos.write(length);
                 }
             }
             return bytes;
-        }
-    }
-
-    private ByteArrayOutputStream getHTTPErrorBody(HttpURLConnection con) throws IOException {
-        try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-            try (BufferedOutputStream bos = new BufferedOutputStream(bytes)) {
-                BufferedInputStream bis = new BufferedInputStream(con.getErrorStream());
-                int length;
-                while ((length = bis.read()) != -1) {
-                    bos.write(length);
-                }
-            }
-            return bytes;
+        } catch (IOException ex) {
+            return new ByteArrayOutputStream();
         }
     }
 
     private void showHTTPErrorMessage(int code, String message) {
         logger.info("http error: " + code + " " + message);
         JOptionPane.showMessageDialog(null, "http status code: " + code + "\n\n" + message, "http error", JOptionPane.ERROR_MESSAGE);
-        SSLSocketFactoryHelper.setPIN("", false);
-        System.exit(1);
+        System.exit(0);
+    }
+
+    private void setAuthHeader(HttpURLConnection con) {
+        String userPass = user + ":" + password;
+        String base64UserPass = Base64.getEncoder().encodeToString(userPass.getBytes());
+        /* 401 WWW-Authenticate: なしでもAuthヘッダを設定するため(Authenticatorでは初回はAuthヘッダをつけてくれない) */
+        con.setRequestProperty("Authorization", "Basic " + base64UserPass);
+        logger.debug("set Auth header");
     }
 
     private synchronized Object jsonRPC(String url, String method, JSONObject params) throws JSONException, IOException {
@@ -278,6 +304,18 @@ public class Protocol {
             logger.info("----");
         }
         HttpURLConnection con = getHttpURLConnection(url);
+        if (!useSSO) {
+            switch (serverType) {
+                case "ginbee":
+                    if (method.equals("start_session")) {
+                        setAuthHeader(con);
+                    }
+                    break;
+                default:
+                    setAuthHeader(con);
+                    break;
+            }
+        }
         con.setDoOutput(true);
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("POST");
@@ -285,13 +323,19 @@ public class Protocol {
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
-        try (OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
+        if (!this.openid_connect_rp_cookie.isEmpty()) {
+            con.setRequestProperty("Cookie", this.openid_connect_rp_cookie);
+            this.openid_connect_rp_cookie = "";
+        }
+
+        try ( OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
             osw.write(reqStr);
             osw.flush();
         }
 
         int resCode = con.getResponseCode();
         String resMessage = con.getResponseMessage();
+        String body;
 
         switch (resCode) {
             case 200:
@@ -299,15 +343,23 @@ public class Protocol {
                 break;
             case 401:
             case 403:
-                logger.info("auth error:" + resCode);
-                JOptionPane.showMessageDialog(null, Messages.getString("Protocol.auth_error_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
-                SSLSocketFactoryHelper.setPIN("", false);
-                System.exit(1);
+                body = getHTTPBody(con).toString("UTF-8");
+                if (body.equalsIgnoreCase("NOT PERMITTED CERTIFICATE")) {
+                    logger.info("403 not permitted certificate");
+                    JOptionPane.showMessageDialog(null, Messages.getString("Protocol.certificate_error_message"), Messages.getString("Protocol.certificate_error"), JOptionPane.ERROR_MESSAGE);
+                } else if (body.equalsIgnoreCase("USER NOT IN TENANTDB")) {
+                    logger.info("401 user not in tenantdb");
+                    JOptionPane.showMessageDialog(null, Messages.getString("Protocol.user_not_in_tenantdb_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
+                } else {
+                    logger.info("" + resCode + " auth error ... " + body);
+                    JOptionPane.showMessageDialog(null, Messages.getString("Protocol.auth_error_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
+                }
+                System.exit(0);
                 break;
             case 503:
-                String body = getHTTPErrorBody(con).toString("UTF-8");
+                body = getHTTPBody(con).toString("UTF-8");
                 if (body.equalsIgnoreCase("GINBEE_MAINTENANCE")) {
-                    logger.info("server maintenance ... exit");
+                    logger.info("503 server maintenance ... exit");
                     JOptionPane.showMessageDialog(null, Messages.getString("Protocol.maintenance_error_message"), Messages.getString("Protocol.maintenance_error"), JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
                 } else {
@@ -319,35 +371,27 @@ public class Protocol {
                 break;
         }
 
-        ByteArrayOutputStream bytes = getHTTPBody(con);
+        Object result;
+        try ( ByteArrayOutputStream bytes = getHTTPBody(con)) {
+            long et = System.currentTimeMillis();
+            if (System.getProperty("monsia.do_profile") != null) {
+                logger.info(method + ":" + (et - st) + "ms request_bytes:" + reqStr.length() + " response_bytes:" + bytes.size());
+            }
+            String resStr = bytes.toString("UTF-8");
+            if (System.getProperty("monsia.debug.jsonrpc") != null) {
+                logger.info("---- JSONRPC response");
+                logger.info(resStr);
+                logger.info("----");
+            }
+            result = checkJSONRPCResponse(resStr);
+        }
         con.disconnect();
-
-        long et = System.currentTimeMillis();
-        if (System.getProperty("monsia.do_profile") != null) {
-            logger.info(method + ":" + (et - st) + "ms request_bytes:" + reqStr.length() + " response_bytes:" + bytes.size());
-        }
-
-        String resStr = bytes.toString("UTF-8");
-
-        if (System.getProperty("monsia.debug.jsonrpc") != null) {
-            logger.info("---- JSONRPC response");
-            logger.info(resStr);
-            logger.info("----");
-        }
-        Object result = checkJSONRPCResponse(resStr);
         return result;
     }
 
-    public void getServerInfo() throws IOException, JSONException {
-        JSONObject params = new JSONObject();
-        JSONObject result = (JSONObject) jsonRPC(authURI, "get_server_info", params);
-        this.protocolVersion = result.getString("protocol_version");
-        this.applicationVersion = result.getString("application_version");
-        this.serverType = result.getString("server_type");
-
-        logger.debug("protocol_version:" + this.protocolVersion);
-        logger.debug("application_version:" + this.applicationVersion);
-        logger.debug("server_type:" + this.serverType);
+    private String startOpenIDConnect(String sso_user, String sso_password, String sso_sp_uri, JSONObject params) throws IOException, JSONException {
+        OpenIdConnect sso = new OpenIdConnect(sso_user, sso_password, authURI, params);
+        return sso.connect();
     }
 
     public void startSession() throws IOException, JSONException {
@@ -356,10 +400,22 @@ public class Protocol {
         meta.put("client_version", PANDA_CLIENT_VERSION);
         params.put("meta", meta);
 
+        if (useSSO) {
+            authURI = startOpenIDConnect(user, password, authURI, params);
+        } else {
+            getServerInfo();
+        }
+
         JSONObject result = (JSONObject) jsonRPC(authURI, "start_session", params);
         meta = result.getJSONObject("meta");
 
         this.sessionId = meta.getString("session_id");
+        if (meta.has("tenant_id")) {
+            this.tenantId = meta.getString("tenant_id");
+        }
+        if (meta.has("group_id")) {
+            this.groupId = meta.getString("group_id");
+        }
 
         this.rpcURI = result.getString("app_rpc_endpoint_uri");
         this.restURIRoot = result.getString("app_rest_api_uri_root");
@@ -375,15 +431,17 @@ public class Protocol {
         if (System.getProperty("monsia.disable_push_client") != null) {
             this.usePushClient = false;
         }
+        if (result.has("startup_message")) {
+            this.startupMessage = result.getString("startup_message");
+        }
+
+        logger.info("tenant_id:" + this.tenantId);
+        logger.info("group_id:" + this.groupId);
         logger.info("session_id:" + this.sessionId);
         logger.info("rpcURI:" + this.rpcURI);
         logger.info("restURIRoot:" + this.restURIRoot);
         logger.info("usePushClient:" + this.usePushClient);
         logger.info("pusherURI:" + this.pusherURI);
-    }
-
-    public String getServerType() {
-        return serverType;
     }
 
     public synchronized void endSession() throws IOException, JSONException {
@@ -441,6 +499,18 @@ public class Protocol {
         return (JSONObject) jsonRPC(this.rpcURI, "get_message", params);
     }
 
+    public void getServerInfo() throws IOException, JSONException {
+        JSONObject params = new JSONObject();
+        JSONObject result = (JSONObject) jsonRPC(authURI, "get_server_info", params);
+        this.protocolVersion = result.getString("protocol_version");
+        this.applicationVersion = result.getString("application_version");
+        this.serverType = result.getString("server_type");
+
+        logger.info("protocol_version:" + this.protocolVersion);
+        logger.info("application_version:" + this.applicationVersion);
+        logger.info("server_type:" + this.serverType);
+    }
+
     public synchronized JSONArray listDownloads() throws IOException, JSONException {
         JSONObject params = new JSONObject();
         JSONObject meta = new JSONObject();
@@ -459,31 +529,18 @@ public class Protocol {
         }
 
         URL url = new URL(this.restURIRoot + "sessions/" + this.sessionId + "/blob/" + oid);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-        String protocol = url.getProtocol();
-        switch (protocol) {
-            case "https":
-                if (sslSocketFactory != null) {
-                    ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
-                }
-                break;
-            case "http":
-                break;
-            default:
-                throw new IOException("bad protocol");
-        }
-
+        HttpURLConnection con = getHttpURLConnection(url);
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
-        BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
-        int length;
-        while ((length = bis.read()) != -1) {
-            out.write(length);
+        try ( BufferedInputStream bis = new BufferedInputStream(con.getInputStream())) {
+            int length;
+            while ((length = bis.read()) != -1) {
+                out.write(length);
+            }
+            out.close();
         }
-        out.close();
         con.disconnect();
 
         return con.getResponseCode();
@@ -491,28 +548,14 @@ public class Protocol {
 
     public synchronized String postBLOB(byte[] in) throws IOException {
         URL url = new URL(this.restURIRoot + "sessions/" + this.sessionId + "/blob/");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-        String protocol = url.getProtocol();
-        switch (protocol) {
-            case "https":
-                if (sslSocketFactory != null) {
-                    ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
-                }
-                break;
-            case "http":
-                break;
-            default:
-                throw new IOException("bad protocol");
-        }
-
+        HttpURLConnection con = getHttpURLConnection(url);
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("POST");
         con.setDoOutput(true);
         //((HttpsURLConnection) con.setFixedLengthStreamingMode(in.length);
         con.setRequestProperty("Content-Type", "application/octet-stream");
         con.setRequestProperty("User-Agent", USER_AGENT);
-        try (OutputStream os = con.getOutputStream()) {
+        try ( OutputStream os = con.getOutputStream()) {
             os.write(in);
             os.flush();
         }

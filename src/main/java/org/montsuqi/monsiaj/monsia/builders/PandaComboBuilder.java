@@ -28,8 +28,8 @@ package org.montsuqi.monsiaj.monsia.builders;
 class PandaComboBuilder extends ComboBuilder {
         @Override
 	protected void ensureValidEntryType(String actualType) {
-		if ( ! "PandaEntry".equals(actualType)) { 
-			throw new WidgetBuildingException("not a PandaEntry widget"); 
+		if ( ! "PandaEntry".equals(actualType)) {
+			throw new WidgetBuildingException("not a PandaEntry widget");
 		}
 	}
 }
