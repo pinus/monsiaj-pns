@@ -88,17 +88,42 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 				break;
 
 			case "C02": // C02 病名登録
-				// CRTL
-				if (e.getModifiers() == InputEvent.CTRL_MASK) {
+				if (e.getModifiers() == InputEvent.CTRL_MASK
+					&& e.getKeyCode() == KeyEvent.VK_0) {
+					// CTRL-0　：　疾患区分をクリア
 					List<JComboBox<?>> combos = componentPicker(w,
 						"C02.fixed6.MANSEIFLGCOMBO");  // 疾患区分
+					combos.get(0).setSelectedIndex(0);
+				}
+				break;
 
-					switch (e.getKeyCode()) {
-						// CTRL-0　：　疾患区分をクリア
-						case KeyEvent.VK_0:
-							combos.get(0).setSelectedIndex(0);
-							break;
-					}
+			case "K02": // K02 診療行為入力
+				if (e.getModifiers() == InputEvent.CTRL_MASK
+					&& e.getKeyCode() == KeyEvent.VK_ENTER) {
+					// CTRL-ENTER　：　中途終了1番を選択・展開
+					List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B12CS"); // 中途表示
+					k02buttons.get(0).doClick();
+
+					// K10 で走らせるマクロ: row 0 を選択して F12 で確定する
+					Runnable r = () -> {
+						// protect time to wait for k10 activation
+						try{ Thread.sleep(100); } catch (InterruptedException ex) {};
+
+						java.awt.Window win = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+						if (win.getName().equals("K10")) {
+							List<JComponent> components = componentPicker(win,
+								"K10.fixed1.scrolledwindow1.LIST", // 表
+								"K10.fixed1.B12"); // 確定ボタン
+
+							PandaCList k10list = (PandaCList) components.get(0);
+							JButton k10button = (JButton) components.get(1);
+
+							k10list.singleSelection(0);
+							k10list.fireChangeEvent(null);
+							k10button.doClick();
+						}
+					};
+					new Thread(r).start();
 				}
 				break;
 		}
@@ -123,7 +148,8 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 		List<T> items = new ArrayList<>(name.length);
 		for (int i=0; i<name.length; i++) { items.add(null); }
 
-		scan(((JFrame)w).getRootPane(), items, name);
+		if (w instanceof JFrame) { scan(((JFrame)w).getRootPane(), items, name); }
+		if (w instanceof JDialog) { scan(((JDialog)w).getRootPane(), items, name); }
 		return items;
 	}
 
