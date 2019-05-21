@@ -167,7 +167,9 @@
                                            displayname="${macosx.app.name}"
                                            identifier="${macosx.app.name}"
                                            mainclassname="org.montsuqi.monsiaj.client.Launcher"
-                                           icon="${icon.dir}/${icon.name}" >
+                                           icon="${icon.dir}/${icon.name}"
+                                           shortversion="${project.version}"
+                                           version="${project.version}">
 
                                     <classpath file="${target.dir}/monsiaj-${project.version}-all.jar" />
                                     <option value="-Xdock:icon=Contents/Resources/${icon.name}"/>
@@ -196,7 +198,7 @@
                                 <move file="${project.build.directory}/monsiaj-${project.version}-bin.zip" tofile="${project.build.directory}/out/monsiaj-bin-${project.version}.zip" />
                                 <move file="${project.build.directory}/monsiaj-${project.version}-src.zip" tofile="${project.build.directory}/out/monsiaj-src-${project.version}.zip" />
                                 <move file="${project.build.directory}/monsiaj-${project.version}-all.jar" todir="${project.build.directory}/out" />
-                                <move file="${project.build.directory}/monsiaj-loader-${project.version}-all.jar" todir="${project.build.directory}/out" />                                
+                                <move file="${project.build.directory}/monsiaj-loader-${project.version}-all.jar" todir="${project.build.directory}/out" />
                                 <checksum algorithm="SHA-256" fileext=".sha256">
                                     <fileset dir="${project.build.directory}/out/">
                                         <include name="*"/>
