@@ -168,8 +168,8 @@
                                            identifier="${macosx.app.name}"
                                            mainclassname="org.montsuqi.monsiaj.client.Launcher"
                                            icon="${icon.dir}/${icon.name}"
-                                           shortversion="${project.version}"
-                                           version="${project.version}">
+                                           shortversion="${project.version}-${maven.build.timestamp}"
+                                           version="${project.version}-${maven.build.timestamp}" >
 
                                     <classpath file="${target.dir}/monsiaj-${project.version}-all.jar" />
                                     <option value="-Xdock:icon=Contents/Resources/${icon.name}"/>
