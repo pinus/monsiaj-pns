@@ -124,6 +124,12 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 						}
 					};
 					new Thread(r).start();
+
+				} else if (e.getModifiers() == InputEvent.CTRL_MASK
+					&& e.getKeyCode() == KeyEvent.VK_B) {
+					// CTRL-B
+					List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B07S"); // 病名登録
+					k02buttons.get(0).doClick();
 				}
 				break;
 		}
