@@ -99,7 +99,7 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 
 			case "K02": // K02 診療行為入力
 				if (e.getModifiers() == InputEvent.CTRL_MASK
-					&& e.getKeyCode() == KeyEvent.VK_ENTER) {
+					&& (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_F12)) {
 					// CTRL-ENTER　：　中途終了1番を選択・展開
 					List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B12CS"); // 中途表示
 					k02buttons.get(0).doClick();
