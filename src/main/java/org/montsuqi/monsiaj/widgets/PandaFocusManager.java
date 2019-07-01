@@ -132,6 +132,29 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 					k02buttons.get(0).doClick();
 				}
 				break;
+
+			case "XC01": // プレビュー
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_UP:
+						List<JButton> xc01button = componentPicker(w, "XC01.fixed32.B05");
+						xc01button.get(0).doClick();
+						break;
+
+					case KeyEvent.VK_DOWN:
+						xc01button = componentPicker(w, "XC01.fixed32.B08");
+						xc01button.get(0).doClick();
+						break;
+
+					case KeyEvent.VK_LEFT:
+						xc01button = componentPicker(w, "XC01.fixed32.B06");
+						xc01button.get(0).doClick();
+						break;
+
+					case KeyEvent.VK_RIGHT:
+						xc01button = componentPicker(w, "XC01.fixed32.B07");
+						xc01button.get(0).doClick();
+						break;
+				}
 		}
 
 		// if the event is handled by the Interface, do nothing further.
