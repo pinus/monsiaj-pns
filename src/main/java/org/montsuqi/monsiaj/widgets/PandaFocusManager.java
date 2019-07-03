@@ -48,113 +48,119 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 			return;
 		}
 
-		//pns ショートカット
-		switch (w.getName()) {
-			case "K03": // K03 請求確認
-				if (e.getModifiers() == InputEvent.CTRL_MASK) {
-					// ComboBox を探す
-					List<JComboBox<?>> combos = componentPicker(w,
-						"K03.fixed3.HAKFLGCOMBO",       // 請求書兼領収書
-						"K03.fixed3.MEIPRTFLG_COMB",    // 診療費明細書
-						"K03.fixed3.SYOHOPRTFLGCOMBO"); // 処方箋
+		// pns ショートカット
+		if (!(e.getSource() instanceof NumberEntry)) {
+			switch (w.getName()) {
+				case "K03": // K03 請求確認
+					if (e.getModifiers() == InputEvent.CTRL_MASK) {
+						// ComboBox を探す
+						List<JComboBox<?>> combos = componentPicker(w,
+							"K03.fixed3.HAKFLGCOMBO",       // 請求書兼領収書
+							"K03.fixed3.MEIPRTFLG_COMB",    // 診療費明細書
+							"K03.fixed3.SYOHOPRTFLGCOMBO"); // 処方箋
 
+						switch (e.getKeyCode()) {
+							// CTRL-0　：　領収書，明細書，処方箋発行なし
+							case KeyEvent.VK_0:
+								combos.get(0).setSelectedIndex(1);
+								combos.get(1).setSelectedIndex(1);
+								combos.get(2).setSelectedIndex(1);
+								break;
+							// CTRL-1　：　領収書，明細書だけ発行あり
+							case KeyEvent.VK_1:
+								combos.get(0).setSelectedIndex(2);
+								combos.get(1).setSelectedIndex(2);
+								combos.get(2).setSelectedIndex(1);
+								break;
+							// CTRL-2　：　処方だけ発行あり
+							case KeyEvent.VK_2:
+								combos.get(0).setSelectedIndex(1);
+								combos.get(1).setSelectedIndex(1);
+								combos.get(2).setSelectedIndex(2);
+								break;
+							// CTRL-3　：　全部発行あり
+							case KeyEvent.VK_3:
+								combos.get(0).setSelectedIndex(2);
+								combos.get(1).setSelectedIndex(2);
+								combos.get(2).setSelectedIndex(2);
+								break;
+						}
+					}
+					break;
+
+				case "C02": // C02 病名登録
+					if (e.getModifiers() == InputEvent.CTRL_MASK
+						&& e.getKeyCode() == KeyEvent.VK_0) {
+						// CTRL-0　：　疾患区分をクリア
+						List<JComboBox<?>> combos = componentPicker(w,
+							"C02.fixed6.MANSEIFLGCOMBO");  // 疾患区分
+						combos.get(0).setSelectedIndex(0);
+					}
+					break;
+
+				case "K02": // K02 診療行為入力
+					if (e.getModifiers() == InputEvent.CTRL_MASK
+						&& (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_F12)) {
+						// CTRL-ENTER　：　中途終了1番を選択・展開
+						List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B12CS"); // 中途表示
+						k02buttons.get(0).doClick();
+
+						// K10 で走らせるマクロ: row 0 を選択して F12 で確定する
+						Runnable r = () -> {
+							// protect time to wait for k10 activation
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException ex) {
+							}
+
+							java.awt.Window win = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+							if (win.getName().equals("K10")) {
+								List<JComponent> components = componentPicker(win,
+									"K10.fixed1.scrolledwindow1.LIST", // 表
+									"K10.fixed1.B12"); // 確定ボタン
+
+								PandaCList k10list = (PandaCList) components.get(0);
+								JButton k10button = (JButton) components.get(1);
+
+								k10list.singleSelection(0);
+								k10list.fireChangeEvent(null);
+								k10button.doClick();
+							}
+						};
+						new Thread(r).start();
+
+					} else if (e.getModifiers() == InputEvent.CTRL_MASK
+						&& e.getKeyCode() == KeyEvent.VK_B) {
+						// CTRL-B
+						List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B07S"); // 病名登録
+						k02buttons.get(0).doClick();
+					}
+					break;
+
+				case "XC01": // プレビュー
 					switch (e.getKeyCode()) {
-						// CTRL-0　：　領収書，明細書，処方箋発行なし
-						case KeyEvent.VK_0:
-							combos.get(0).setSelectedIndex(1);
-							combos.get(1).setSelectedIndex(1);
-							combos.get(2).setSelectedIndex(1);
+						case KeyEvent.VK_UP:
+							List<JButton> xc01button = componentPicker(w, "XC01.fixed32.B05");
+							xc01button.get(0).doClick();
 							break;
-						// CTRL-1　：　領収書，明細書だけ発行あり
-						case KeyEvent.VK_1:
-							combos.get(0).setSelectedIndex(2);
-							combos.get(1).setSelectedIndex(2);
-							combos.get(2).setSelectedIndex(1);
+
+						case KeyEvent.VK_DOWN:
+							xc01button = componentPicker(w, "XC01.fixed32.B08");
+							xc01button.get(0).doClick();
 							break;
-						// CTRL-2　：　処方だけ発行あり
-						case KeyEvent.VK_2:
-							combos.get(0).setSelectedIndex(1);
-							combos.get(1).setSelectedIndex(1);
-							combos.get(2).setSelectedIndex(2);
+
+						case KeyEvent.VK_LEFT:
+							xc01button = componentPicker(w, "XC01.fixed32.B06");
+							xc01button.get(0).doClick();
 							break;
-						// CTRL-3　：　全部発行あり
-						case KeyEvent.VK_3:
-							combos.get(0).setSelectedIndex(2);
-							combos.get(1).setSelectedIndex(2);
-							combos.get(2).setSelectedIndex(2);
+
+						case KeyEvent.VK_RIGHT:
+							xc01button = componentPicker(w, "XC01.fixed32.B07");
+							xc01button.get(0).doClick();
 							break;
 					}
-				}
-				break;
-
-			case "C02": // C02 病名登録
-				if (e.getModifiers() == InputEvent.CTRL_MASK
-					&& e.getKeyCode() == KeyEvent.VK_0) {
-					// CTRL-0　：　疾患区分をクリア
-					List<JComboBox<?>> combos = componentPicker(w,
-						"C02.fixed6.MANSEIFLGCOMBO");  // 疾患区分
-					combos.get(0).setSelectedIndex(0);
-				}
-				break;
-
-			case "K02": // K02 診療行為入力
-				if (e.getModifiers() == InputEvent.CTRL_MASK
-					&& (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_F12)) {
-					// CTRL-ENTER　：　中途終了1番を選択・展開
-					List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B12CS"); // 中途表示
-					k02buttons.get(0).doClick();
-
-					// K10 で走らせるマクロ: row 0 を選択して F12 で確定する
-					Runnable r = () -> {
-						// protect time to wait for k10 activation
-						try{ Thread.sleep(100); } catch (InterruptedException ex) {};
-
-						java.awt.Window win = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-						if (win.getName().equals("K10")) {
-							List<JComponent> components = componentPicker(win,
-								"K10.fixed1.scrolledwindow1.LIST", // 表
-								"K10.fixed1.B12"); // 確定ボタン
-
-							PandaCList k10list = (PandaCList) components.get(0);
-							JButton k10button = (JButton) components.get(1);
-
-							k10list.singleSelection(0);
-							k10list.fireChangeEvent(null);
-							k10button.doClick();
-						}
-					};
-					new Thread(r).start();
-
-				} else if (e.getModifiers() == InputEvent.CTRL_MASK
-					&& e.getKeyCode() == KeyEvent.VK_B) {
-					// CTRL-B
-					List<JButton> k02buttons = componentPicker(w, "K02.fixed2.B07S"); // 病名登録
-					k02buttons.get(0).doClick();
-				}
-				break;
-
-			case "XC01": // プレビュー
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_UP:
-						List<JButton> xc01button = componentPicker(w, "XC01.fixed32.B05");
-						xc01button.get(0).doClick();
-						break;
-
-					case KeyEvent.VK_DOWN:
-						xc01button = componentPicker(w, "XC01.fixed32.B08");
-						xc01button.get(0).doClick();
-						break;
-
-					case KeyEvent.VK_LEFT:
-						xc01button = componentPicker(w, "XC01.fixed32.B06");
-						xc01button.get(0).doClick();
-						break;
-
-					case KeyEvent.VK_RIGHT:
-						xc01button = componentPicker(w, "XC01.fixed32.B07");
-						xc01button.get(0).doClick();
-						break;
-				}
+					break;
+			}
 		}
 
 		// if the event is handled by the Interface, do nothing further.
