@@ -1,17 +1,13 @@
 /*      PANDA -- a simple transaction monitor
-
  Copyright (C) 1998-1999 Ogochan.
  2000-2003 Ogochan & JMA (Japan Medical Association).
  2002-2006 OZAWA Sakuro.
-
  This module is part of PANDA.
-
  PANDA is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY.  No author or distributor accepts responsibility
  to anyone for the consequences of using it or for whether it serves
  any particular purpose or works at all, unless he says so in writing.
  Refer to the GNU General Public License for full details.
-
  Everyone is granted permission to copy, modify and redistribute
  PANDA, but only under the conditions described in the GNU General
  Public License.  A copy of this license is supposed to have been given
@@ -85,8 +81,8 @@ public class SSLSocketFactoryHelper {
     private static void checkHostNameInCertificate(final X509Certificate certificate, final String host) throws SSLPeerUnverifiedException {
         // no check against these hostnames.
         if ("localhost".equalsIgnoreCase(host) // $NON-NLS-1$
-                || "127.0.0.1".equals(host) // $NON-NLS-1$
-                || "::1".equals(host)) { // $NON-NLS-1$
+            || "127.0.0.1".equals(host) // $NON-NLS-1$
+            || "::1".equals(host)) { // $NON-NLS-1$
             return;
         }
         // check subjectAlternativeNames first.
@@ -143,7 +139,6 @@ public class SSLSocketFactoryHelper {
         ctx = SSLContext.getInstance("TLSv1.2");
         ctx.init(keyManagers, trustManagers, null);
         factory = ctx.getSocketFactory();
-        SSLContext.setDefault(ctx);
         return factory;
     }
 
@@ -159,7 +154,6 @@ public class SSLSocketFactoryHelper {
         trustManagers = createCAFileTrustManagers(caCert);
         ctx.init(keyManagers, trustManagers, null);
         factory = ctx.getSocketFactory();
-        SSLContext.setDefault(ctx);
         return factory;
     }
 
@@ -174,9 +168,9 @@ public class SSLSocketFactoryHelper {
             out.write(configStr.getBytes());
             out.close();
         }
-        //Provider proto = Security.getProvider("SunPKCS11"); // JAVA 11
-        //Provider p = proto.configure(temp.getAbsolutePath()); // JAVA 11
-        Provider p = new sun.security.pkcs11.SunPKCS11(temp.getAbsolutePath()); // JAVA 8
+        Provider proto = Security.getProvider("SunPKCS11"); // JAVA 11
+        Provider p = proto.configure(temp.getAbsolutePath()); // JAVA 11
+        //Provider p = new sun.security.pkcs11.SunPKCS11(temp.getAbsolutePath()); // JAVA 8
         Security.removeProvider("IAIK");
         Security.addProvider(p);
         KeyStore.Builder builder = KeyStore.Builder.newInstance("PKCS11", p, new KeyStore.CallbackHandlerProtection(new MyCallbackHandler()));

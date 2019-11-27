@@ -37,7 +37,7 @@ import javax.swing.UIManager;
 import org.montsuqi.monsiaj.util.SystemEnvironment;
 
 /** <p>A class that simulates Gtk+'s RadioButton.</p>
- *
+ * 
  * <p>Down arrow key moves focus out to the next component, and
  * up arrow key moves focus out to the previous component respectively.</p>
  */
@@ -55,16 +55,16 @@ public class RadioButton extends JRadioButton {
 
 	private void initActions() {
 		ActionMap actions = getActionMap();
-		actions.put("focusOutNext", new FocusOutNextAction());
-		actions.put("focusOutPrevious", new FocusOutPreviousAction());
+		actions.put("focusOutNext", new FocusOutNextAction()); 
+		actions.put("focusOutPrevious", new FocusOutPreviousAction()); 
 
 		InputMap inputs = getInputMap(JComponent.WHEN_FOCUSED);
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext");
-		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious");
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "focusOutNext"); 
+		inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "focusOutPrevious"); 
 	}
 
 	/** <p>Overrides super.setSize to ensure width is not zero.</p>
-	 *
+	 * 
 	 * @param d the size to set. when its width is zero, it is set to equal to
 	 * its height.
 	 */

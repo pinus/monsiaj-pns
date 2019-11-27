@@ -34,7 +34,7 @@ abstract class ParserState {
 	protected static final Logger logger = LogManager.getLogger(ParserState.class);
 
 	/** <p>Constructs a state with given <var>name</var>.</p>
-	 *
+	 * 
 	 * @param name name of a parser state.
 	 */
 	ParserState(String name) {
@@ -65,7 +65,7 @@ abstract class ParserState {
 	 */
 	protected void warnShouldFindClosing(String element, String found) {
 		Object[] args = { element, found };
-		logger.warn("should find </{0}> here, found </{1}>", args);
+		logger.warn("should find </{0}> here, found </{1}>", args); 
 	}
 
 	/** <p>A helper method to warn that some element found in an element which should be
@@ -75,16 +75,16 @@ abstract class ParserState {
 	 */
 	protected void warnShouldBeEmpty(String element, String found) {
 		Object[] args = { element, found };
-		logger.warn("<{0}> element should be empty, found <{1}>", args);
+		logger.warn("<{0}> element should be empty, found <{1}>", args); 
 	}
 
 	/** <p>A helper method to warn that an element which should have no attributes detects
 	 * some attributes specified.</p>
-	 *
+	 * 
 	 * @param element current element.
 	 */
 	protected void warnShouldHaveNoAttributes(String element) {
-		logger.warn("<{0}> should have no attributes", element);
+		logger.warn("<{0}> should have no attributes", element); 
 	}
 
 	/** <p>A helper method to warn that wrong type of property is being set at the current
@@ -92,11 +92,11 @@ abstract class ParserState {
 	 * @param element current element.
 	 */
 	protected void warnInvalidPropertiesDefinedHere(String element) {
-		logger.warn("non {0} properties defined here", element);
+		logger.warn("non {0} properties defined here", element); 
 	}
 
 	/** <p>Returns the name of this state.</p>
-	 *
+	 * 
 	 * @return name of this state.
 	 */
 	public String getName() {

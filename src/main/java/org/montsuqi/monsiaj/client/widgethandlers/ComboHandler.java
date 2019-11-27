@@ -42,23 +42,27 @@ import org.montsuqi.monsiaj.client.UIControl;
  * A class to send/receive Combo data.</p>
  */
 class ComboHandler extends WidgetHandler {
-
+    
     static final Logger logger = LogManager.getLogger(ComboHandler.class);
-
+    
     @Override
     @SuppressWarnings("unchecked")
     public void set(UIControl con, Component widget, JSONObject obj, Map styleMap) throws JSONException {
         JComboBox<String> combo = ((JComboBox<String>) widget);
         DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) combo.getModel();
-
+        
         this.setCommonAttribute(widget, obj, styleMap);
-
+        
         int count = 0;
         if (obj.has("count")) {
             count = obj.getInt("count");
+            if (count < 0) {
+                logger.warn("" + widget.getName() + "invalid count:"+count);
+                count = 0;
+            }
         }
-
-        if (obj.has("item")) {
+        
+        if (obj.has("item")) {            
             JSONArray array = obj.getJSONArray("item");
             List<String> list = new ArrayList<>();
             list.add("");
@@ -72,7 +76,7 @@ class ComboHandler extends WidgetHandler {
                 model.addElement(s);
             }
         }
-
+        
         Component editor = combo.getEditor().getEditorComponent();
         String entryString = null;
         for (Iterator i = obj.keys(); i.hasNext();) {
@@ -80,11 +84,11 @@ class ComboHandler extends WidgetHandler {
             if (this.isCommonAttribute(key)) {
                 // do nothing
             } else if (key.matches("count")) {
-                // do nothing
+                // do nothing                
             } else if (key.matches("item")) {
                 // do nothing
             } else {
-                /*
+                /*                
                  JSONObject entryObj = obj.getJSONObject(key);
                  EntryHandler entryHandler = new EntryHandler();
                  entryHandler.set(con,editor,entryObj,styleMap);
@@ -103,7 +107,7 @@ class ComboHandler extends WidgetHandler {
             widget.dispatchEvent(new KeyEvent(editor, KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_UNDEFINED, KeyEvent.CHAR_UNDEFINED));
         }
     }
-
+    
     @Override
     public void get(UIControl con, Component widget, JSONObject obj) throws JSONException {
     }

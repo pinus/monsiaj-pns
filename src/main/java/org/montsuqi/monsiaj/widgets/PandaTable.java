@@ -454,15 +454,15 @@ public class PandaTable extends JTable {
         table.setCell(0, 1, "hoge\nmoge\noge");
 
         table.getModel().addTableModelListener(
-                new TableModelListener() {
+            new TableModelListener() {
 
-                    @Override
-                    public void tableChanged(TableModelEvent te) {
-                        int row = te.getLastRow();
-                        int col = te.getColumn();
-                        System.out.println("[" + row + "," + col + "] " + table.getModel().getValueAt(row, col) + " " + table.getModel().getValueAt(row, col).getClass());
-                    }
-                });
+                @Override
+                public void tableChanged(TableModelEvent te) {
+                    int row = te.getLastRow();
+                    int col = te.getColumn();
+                    System.out.println("[" + row + "," + col + "] " + table.getModel().getValueAt(row, col) + " " + table.getModel().getValueAt(row, col).getClass());
+                }
+            });
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(400, 300));

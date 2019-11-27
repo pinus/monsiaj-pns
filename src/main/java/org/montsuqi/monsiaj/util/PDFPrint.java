@@ -32,7 +32,7 @@ public class PDFPrint {
         try {
             try (PDDocument document = PDDocument.load(file)) {
                 MediaSizeName size = getMediaSizeName(document);
-
+                
                 PrinterJob job = PrinterJob.getPrinterJob();
                 job.setPrintService(ps);
                 job.setPageable(new PDFPageable(document));
@@ -40,12 +40,12 @@ public class PDFPrint {
                 attr.add(size);
                 attr.add(new Copies(copies));
                 attr.add(new JobName(file.getName(), null));
-
+                
                 PageFormat pf = job.getPageFormat(attr);
                 Paper paper = pf.getPaper();
                 paper.setImageableArea(0, 0, paper.getWidth(), paper.getHeight());
                 pf.setPaper(paper);
-
+                
                 job.print(attr);
             }
         } catch (IOException | PrinterException ex) {
@@ -58,7 +58,7 @@ public class PDFPrint {
         try {
             try (PDDocument document = PDDocument.load(file)) {
                 MediaSizeName size = getMediaSizeName(document);
-
+                
                 PrinterJob job = PrinterJob.getPrinterJob();
                 job.setPageable(new PDFPageable(document));
                 PrintService ps = loadPrintService();
@@ -71,7 +71,7 @@ public class PDFPrint {
                   attr.add(size);
                 }
                 attr.add(new JobName(file.getName(), null));
-
+                
                 if (!job.printDialog(attr)) {
                     return;
                 }
@@ -79,7 +79,7 @@ public class PDFPrint {
                 Paper paper = pf.getPaper();
                 paper.setImageableArea(0, 0, paper.getWidth(), paper.getHeight());
                 pf.setPaper(paper);
-
+                
                 job.print(attr);
                 savePrintService(job.getPrintService());
                 savePrintRequestAttributeSet(attr);

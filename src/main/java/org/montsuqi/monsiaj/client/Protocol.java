@@ -30,9 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.Proxy;
 import java.security.GeneralSecurityException;
@@ -52,6 +50,13 @@ import org.json.JSONObject;
  * connection.</p>
  */
 public class Protocol {
+
+    /**
+     * @return the serverType
+     */
+    public String getServerType() {
+        return serverType;
+    }
 
     static final Logger logger = LogManager.getLogger(Protocol.class);
     // jsonrpc
@@ -305,7 +310,7 @@ public class Protocol {
         }
         HttpURLConnection con = getHttpURLConnection(url);
         if (!useSSO) {
-            switch (serverType) {
+            switch (getServerType()) {
                 case "ginbee":
                     if (method.equals("start_session")) {
                         setAuthHeader(con);
@@ -322,6 +327,9 @@ public class Protocol {
         //          ((HttpsURLConnection) con).setFixedLengthStreamingMode(reqStr.length());
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("User-Agent", USER_AGENT);
+        if (useSSO) {
+            con.setRequestProperty("X-Support-SSO", "1");
+        }
 
         if (!this.openid_connect_rp_cookie.isEmpty()) {
             con.setRequestProperty("Cookie", this.openid_connect_rp_cookie);
@@ -508,7 +516,7 @@ public class Protocol {
 
         logger.info("protocol_version:" + this.protocolVersion);
         logger.info("application_version:" + this.applicationVersion);
-        logger.info("server_type:" + this.serverType);
+        logger.info("server_type:" + this.getServerType());
     }
 
     public synchronized JSONArray listDownloads() throws IOException, JSONException {

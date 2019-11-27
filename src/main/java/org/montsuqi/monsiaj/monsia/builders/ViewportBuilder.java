@@ -37,7 +37,7 @@ import org.montsuqi.monsiaj.monsia.WidgetInfo;
 class ViewportBuilder extends ContainerBuilder {
 	void buildChildren(Interface xml, Container parent, WidgetInfo info) {
 		if (info.getChildren().size() != 1) {
-			throw new WidgetBuildingException("only one child for a Viewport");
+			throw new WidgetBuildingException("only one child for a Viewport"); 
 		}
 		ChildInfo cInfo = info.getChild(0);
 		WidgetInfo wInfo = cInfo.getWidgetInfo();

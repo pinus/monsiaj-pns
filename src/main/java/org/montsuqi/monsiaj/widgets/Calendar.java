@@ -73,7 +73,7 @@ public class Calendar extends JComponent {
         add(caption, BorderLayout.NORTH);
         caption.setLayout(new GridLayout(1, 2));
 
-        yearSpinner = new CalendarSpinner(java.util.Calendar.YEAR, Messages.getString("Calendar.year_format"));
+        yearSpinner = new CalendarSpinner(java.util.Calendar.YEAR, Messages.getString("Calendar.year_format")); 
         caption.add(yearSpinner);
         monthSpinner = new CalendarSpinner(java.util.Calendar.MONTH, Messages.getString("Calendar.month_format"));
         caption.add(monthSpinner);
@@ -265,12 +265,12 @@ public class Calendar extends JComponent {
     }
 
     public static void main(String[] args) {
-        final JFrame f = new JFrame("CalendarTest");
+        final JFrame f = new JFrame("CalendarTest"); 
         final Calendar cal = new Calendar();
         f.getContentPane().add(cal);
         f.setSize(400, 300);
         f.setVisible(true);
-        final DateFormat dayFormat = new SimpleDateFormat("yyyy/MM/dd");
+        final DateFormat dayFormat = new SimpleDateFormat("yyyy/MM/dd"); 
         cal.addChangeListener(new ChangeListener() {
 
             public void stateChanged(ChangeEvent e) {

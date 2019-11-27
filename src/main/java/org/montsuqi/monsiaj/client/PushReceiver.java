@@ -281,7 +281,7 @@ public class PushReceiver implements Runnable {
             queue.put(obj);
         } catch (InterruptedException ex) {
             logger.error(ex, ex);
-        }
+        }        
     }
 
     private void messageHandler(String message) throws PusherErrorCommand {

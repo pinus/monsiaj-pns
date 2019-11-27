@@ -30,7 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
 
 /** <p>A class that simulates Gtk+'s VSeparator(vertical separator).</p>
- *
+ * 
  * <p>This class simulates Gtk+'s separator by displacing horizontal location.</p>
  */
 public class VSeparator extends JSeparator {

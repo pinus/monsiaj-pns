@@ -43,8 +43,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * <p>A HTML viewer for platforms other than MacOS X.</p> <p>This component uses
- * JEditorPane to render HTML.</p>
+ * <p>
+ * A HTML viewer for platforms other than MacOS X.</p>
+ * <p>
+ * This component uses JEditorPane to render HTML.</p>
  */
 public class PandaHTML extends JPanel {
 
@@ -90,11 +92,15 @@ public class PandaHTML extends JPanel {
     }
 
     /**
-     * <p>Loads a HTML from the given URL and render it.</p>
+     * <p>
+     * Loads a HTML from the given URL and render it.</p>
      *
      * @param uri source URL of the document.
      */
     public void setURI(URL uri) {
+        if (System.getProperty("monsia.disable.panda_html") != null) {
+            return;
+        }
         Runnable loader = createLoader(uri);
         logger.debug("loading: {0}", uri);
         Executor executor = new ThreadPerTaskExecutor();
@@ -102,7 +108,7 @@ public class PandaHTML extends JPanel {
     }
 
     public void setText(String text) {
-        ((JEditorPane)html).setText(text);
+        ((JEditorPane) html).setText(text);
     }
 
     protected class ThreadPerTaskExecutor implements Executor {
