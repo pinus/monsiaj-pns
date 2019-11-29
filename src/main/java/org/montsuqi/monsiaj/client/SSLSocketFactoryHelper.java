@@ -168,9 +168,9 @@ public class SSLSocketFactoryHelper {
             out.write(configStr.getBytes());
             out.close();
         }
-        Provider proto = Security.getProvider("SunPKCS11"); // JAVA 11
-        Provider p = proto.configure(temp.getAbsolutePath()); // JAVA 11
-        //Provider p = new sun.security.pkcs11.SunPKCS11(temp.getAbsolutePath()); // JAVA 8
+        //Provider proto = Security.getProvider("SunPKCS11"); // JAVA 11
+        //Provider p = proto.configure(temp.getAbsolutePath()); // JAVA 11
+        Provider p = new sun.security.pkcs11.SunPKCS11(temp.getAbsolutePath()); // JAVA 8
         Security.removeProvider("IAIK");
         Security.addProvider(p);
         KeyStore.Builder builder = KeyStore.Builder.newInstance("PKCS11", p, new KeyStore.CallbackHandlerProtection(new MyCallbackHandler()));
