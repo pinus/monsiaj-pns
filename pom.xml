@@ -179,7 +179,9 @@
                                            shortversion="${project.version}-${maven.build.timestamp}"
                                            version="${project.version}-${maven.build.timestamp}" >
 
+                                    <!-- include java runtime into pacakge
                                     <runtime dir="${runtime}"/>
+                                    -->
                                     <classpath file="${target.dir}/monsiaj-${project.version}-all.jar" />
                                     <option value="-Xdock:icon=Contents/Resources/${icon.name}"/>
                                     <option value="-Dapple.laf.useScreenMenuBar=true"/>
