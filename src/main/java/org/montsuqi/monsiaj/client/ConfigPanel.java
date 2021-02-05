@@ -206,7 +206,8 @@ public class ConfigPanel extends JPanel {
         boolean savePassword = conf.getSavePassword(num);
         String authURI = conf.getAuthURI(num);
         boolean use_sso = conf.getUseSSO(num);
-        useSSOCheckbox.setSelected(use_sso);
+        //useSSOCheckbox.setSelected(use_sso);
+        useSSOCheckbox.setSelected(false);
 
         userEntry.setText(user);
         // Save save_pass check field before the password itself,
