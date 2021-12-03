@@ -1,13 +1,17 @@
 /*      PANDA -- a simple transaction monitor
+
  Copyright (C) 1998-1999 Ogochan.
  2000-2003 Ogochan & JMA (Japan Medical Association).
  2002-2006 OZAWA Sakuro.
+
  This module is part of PANDA.
+
  PANDA is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY.  No author or distributor accepts responsibility
  to anyone for the consequences of using it or for whether it serves
  any particular purpose or works at all, unless he says so in writing.
  Refer to the GNU General Public License for full details.
+
  Everyone is granted permission to copy, modify and redistribute
  PANDA, but only under the conditions described in the GNU General
  Public License.  A copy of this license is supposed to have been given
@@ -25,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +43,7 @@ import org.montsuqi.monsiaj.widgets.PandaTable;
  */
 class PandaTableHandler extends WidgetHandler {
 
+    static final Logger logger = LogManager.getLogger(PandaTableHandler.class);
     private static final List<String> widgetList;
     private int editingRow; //pns 編集中の行
 
@@ -58,6 +65,10 @@ class PandaTableHandler extends WidgetHandler {
         int trow = 0;
         if (obj.has("trow")) {
             trow = obj.getInt("trow");
+            if (trow < 0) {
+                logger.warn("" + widget.getName() + "invalid trow:" + trow);
+                trow = 0;
+            }
             if (trow >= 1) {
                 trow -= 1;
             }
@@ -91,6 +102,10 @@ class PandaTableHandler extends WidgetHandler {
         int tcolumn = 0;
         if (obj.has("tcolumn")) {
             tcolumn = obj.getInt("tcolumn");
+            if (tcolumn < 0) {
+                logger.warn("" + widget.getName() + "invalid tcolumn:" + tcolumn);
+                tcolumn = 0;
+            }
             if (tcolumn >= 1) {
                 tcolumn -= 1;
             }
@@ -101,14 +116,12 @@ class PandaTableHandler extends WidgetHandler {
 
         if (obj.has("rowdata")) {
             JSONArray array = obj.getJSONArray("rowdata");
-//System.out.println("rowdata length:"+array.length());
             for (int i = 0; i < array.length(); i++) {
                 JSONObject rowObj = array.getJSONObject(i);
                 for (int j = 0; j < table.getColumns(); j++) {
                     String key = "column" + (j + 1);
                     if (rowObj.has(key)) {
                         JSONObject colObj = rowObj.getJSONObject(key);
-//System.out.println(key + " " + colObj.toString());
                         if (colObj.has("celldata")) {
                             table.setCell(i, j, colObj.getString("celldata"));
                         }
@@ -186,7 +199,7 @@ class PandaTableHandler extends WidgetHandler {
         obj.put("rowdata", array);
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             for (int j = 0; j < table.getColumns(); j++) {
-                String val = (String)tableModel.getValueAt(i, j);
+                String val = (String) tableModel.getValueAt(i, j);
                 if (!val.isEmpty()) {
                     k = i + 1;
                 }

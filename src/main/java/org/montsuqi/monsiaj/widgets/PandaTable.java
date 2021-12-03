@@ -193,8 +193,8 @@ public class PandaTable extends JTable {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     PandaTable.this.setEnterPressed(true);
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN
-                    || e.getKeyCode() == KeyEvent.VK_UP
-                    || e.getKeyCode() == KeyEvent.VK_TAB) {
+                        || e.getKeyCode() == KeyEvent.VK_UP
+                        || e.getKeyCode() == KeyEvent.VK_TAB) {
                     Component parent = ((Component) e.getSource()).getParent();
                     KeyEvent pass = new KeyEvent(parent, e.getID(), e.getWhen(), e.getModifiers(), e.getKeyCode(), e.getKeyChar());
                     parent.dispatchEvent(pass);
@@ -217,7 +217,7 @@ public class PandaTable extends JTable {
 
             @Override
             public void focusGained(FocusEvent e) {
-                // do nothing
+                // do nothing                
                 if (SystemEnvironment.isWindows()) {
                     if (imControls[getSelectedColumn()]) {
                         InputContext ic = getInputContext();
@@ -240,7 +240,7 @@ public class PandaTable extends JTable {
                         ic.selectInputMethod(Locale.ENGLISH);
                     }
                 }
-                ce.stopCellEditing();
+                ce.stopCellEditing();                
             }
         });
 
@@ -352,7 +352,7 @@ public class PandaTable extends JTable {
 
     public void setFGColor(int row, int column, String _color) {
         if (0 <= row && row < model.getRowCount()
-            && 0 <= column && column < model.getColumnCount()) {
+                && 0 <= column && column < model.getColumnCount()) {
             Color color = SafeColorDecoder.decode(_color);
             fgColors[row][column] = color != null ? color : Color.BLACK;
         }
@@ -360,7 +360,7 @@ public class PandaTable extends JTable {
 
     public void setBGColor(int row, int column, String _color) {
         if (0 <= row && row < model.getRowCount()
-            && 0 <= column && column < model.getColumnCount()) {
+                && 0 <= column && column < model.getColumnCount()) {
             Color color = SafeColorDecoder.decode(_color);
             bgColors[row][column] = color != null ? color : Color.WHITE;
         }
@@ -384,7 +384,7 @@ public class PandaTable extends JTable {
 
     @Override
     public Component prepareRenderer(
-        TableCellRenderer renderer, int row, int column) {
+            TableCellRenderer renderer, int row, int column) {
         Component c = super.prepareRenderer(renderer, row, column);
         if (fgColors != null) {
             c.setForeground(fgColors[row][column]);
@@ -454,15 +454,15 @@ public class PandaTable extends JTable {
         table.setCell(0, 1, "hoge\nmoge\noge");
 
         table.getModel().addTableModelListener(
-            new TableModelListener() {
+                new TableModelListener() {
 
-                @Override
-                public void tableChanged(TableModelEvent te) {
-                    int row = te.getLastRow();
-                    int col = te.getColumn();
-                    System.out.println("[" + row + "," + col + "] " + table.getModel().getValueAt(row, col) + " " + table.getModel().getValueAt(row, col).getClass());
-                }
-            });
+                    @Override
+                    public void tableChanged(TableModelEvent te) {
+                        int row = te.getLastRow();
+                        int col = te.getColumn();
+                        System.out.println("[" + row + "," + col + "] " + table.getModel().getValueAt(row, col) + " " + table.getModel().getValueAt(row, col).getClass());
+                    }
+                });
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(400, 300));

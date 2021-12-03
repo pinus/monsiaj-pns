@@ -1,13 +1,17 @@
 /*      PANDA -- a simple transaction monitor
+
  Copyright (C) 1998-1999 Ogochan.
  2000-2003 Ogochan & JMA (Japan Medical Association).
  2002-2006 OZAWA Sakuro.
+
  This module is part of PANDA.
+
  PANDA is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY.  No author or distributor accepts responsibility
  to anyone for the consequences of using it or for whether it serves
  any particular purpose or works at all, unless he says so in writing.
  Refer to the GNU General Public License for full details.
+
  Everyone is granted permission to copy, modify and redistribute
  PANDA, but only under the conditions described in the GNU General
  Public License.  A copy of this license is supposed to have been given
@@ -81,8 +85,8 @@ public class SSLSocketFactoryHelper {
     private static void checkHostNameInCertificate(final X509Certificate certificate, final String host) throws SSLPeerUnverifiedException {
         // no check against these hostnames.
         if ("localhost".equalsIgnoreCase(host) // $NON-NLS-1$
-            || "127.0.0.1".equals(host) // $NON-NLS-1$
-            || "::1".equals(host)) { // $NON-NLS-1$
+                || "127.0.0.1".equals(host) // $NON-NLS-1$
+                || "::1".equals(host)) { // $NON-NLS-1$
             return;
         }
         // check subjectAlternativeNames first.
@@ -164,7 +168,7 @@ public class SSLSocketFactoryHelper {
         String configStr = "name=monsiaj\nlibrary=" + lib + "\nslot=" + slot;
         File temp = TempFile.createTempFile("pkcs11", "cfg");
         temp.deleteOnExit();
-        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(temp))) {
+        try ( OutputStream out = new BufferedOutputStream(new FileOutputStream(temp))) {
             out.write(configStr.getBytes());
             out.close();
         }
@@ -264,17 +268,22 @@ public class SSLSocketFactoryHelper {
         return strs;
     }
 
-    private TrustManager[] createCAFileTrustManagers(String caCertPath) throws GeneralSecurityException, FileNotFoundException, IOException {
-        KeyStore keystore = KeyStore.getInstance("JKS");
-        keystore.load(null);
+    public static KeyStore createCAFtileTrustKeyStore(String caCertPath) throws GeneralSecurityException, FileNotFoundException, IOException {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(null);
 
         String pemStrs[] = splitCertFile(caCertPath);
         for (String pem : pemStrs) {
             X509Certificate cert = parseCertPem(pem);
-            keystore.setCertificateEntry(cert.getSubjectDN().toString(), cert);
+            ks.setCertificateEntry(cert.getSubjectDN().toString(), cert);
         }
+        return ks;
+    }
+
+    private TrustManager[] createCAFileTrustManagers(String caCertPath) throws GeneralSecurityException, FileNotFoundException, IOException {
+        KeyStore ks = createCAFtileTrustKeyStore(caCertPath);
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(keystore);
+        tmf.init(ks);
         final TrustManager[] tms = tmf.getTrustManagers();
         for (TrustManager tm1 : tms) {
             if (tm1 instanceof X509TrustManager) {
