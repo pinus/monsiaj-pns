@@ -44,6 +44,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -58,11 +59,13 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
+import org.montsuqi.monsiaj.util.LogFile;
 import org.montsuqi.monsiaj.util.OptionParser;
 import org.montsuqi.monsiaj.util.SystemEnvironment;
 import org.montsuqi.monsiaj.util.TempFile;
 import org.montsuqi.monsiaj.widgets.Button;
 import org.montsuqi.monsiaj.widgets.ExceptionDialog;
+import org.montsuqi.monsiaj.widgets.FileChooserButton;
 
 public class Launcher {
 
@@ -95,6 +98,7 @@ public class Launcher {
         conf = new Config();
         initLookAndFeel();
         TempFile.cleanOld();
+        LogFile.cleanOld();
     }
 
     private void initLookAndFeel() {
@@ -309,7 +313,7 @@ public class Launcher {
         });
         bar.add(run);
 
-        Button save = new Button(new AbstractAction(Messages.getString("Launcher.save_label")) {
+        Button saveButton = new Button(new AbstractAction(Messages.getString("Launcher.save_label")) {
 
             @Override
             public void actionPerformed(ActionEvent ev) {
@@ -318,9 +322,9 @@ public class Launcher {
                 conf.save();
             }
         });
-        bar.add(save);
+        bar.add(saveButton);
 
-        Button cancel = new Button(new AbstractAction(Messages.getString("Launcher.cancel_label")) {
+        Button cancelButton = new Button(new AbstractAction(Messages.getString("Launcher.cancel_label")) {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -328,9 +332,9 @@ public class Launcher {
                 System.exit(0);
             }
         });
-        bar.add(cancel);
+        bar.add(cancelButton);
 
-        Button config = new Button(new AbstractAction(Messages.getString("Launcher.config_label")) {
+        Button configButton = new Button(new AbstractAction(Messages.getString("Launcher.config_label")) {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -339,7 +343,21 @@ public class Launcher {
                 updateConfigCombo();
             }
         });
-        bar.add(config);
+        bar.add(configButton);
+
+        Button logViewerButton = new Button(new AbstractAction(Messages.getString("Launcher.logviewer_label")) {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final String[] PATH_ELEM = {System.getProperty("user.home"), ".monsiaj", "logs"};
+                final JFileChooser chooser = new JFileChooser(SystemEnvironment.createFilePath(PATH_ELEM).getAbsolutePath());
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    LogViewer lv = new LogViewer(chooser.getSelectedFile());
+                    lv.run();
+                }
+            }
+        });
+        bar.add(logViewerButton);
 
         f.setSize(800, 480);
         f.setResizable(true);
@@ -350,16 +368,52 @@ public class Launcher {
         run.requestFocus();
     }
 
+    private static String toLowerCaseNullCheck(String str) {
+        if (str == null) {
+            str = "";
+        }
+        return str.toLowerCase();
+    }
+
     private void connect() {
         conf.save();
         try {
             Client client = new Client(conf);
             client.connect();
-        } catch (IOException | GeneralSecurityException | JSONException e) {
-            logger.catching(Level.FATAL, e);
-            ExceptionDialog.showExceptionDialog(e);
-            System.exit(1);
+        } catch (java.net.UnknownHostException e) {
+            showErrorDialog(e, Messages.getString("Client.unknown_host_error"), Messages.getString("Client.unknown_host_error_msg") + e.getMessage());
+        } catch (javax.net.ssl.SSLException e) {
+            String msg = toLowerCaseNullCheck(e.getMessage());
+            if (msg.contains("the trustAnchors parameter must be non-empty".toLowerCase())) {
+                showErrorDialog(e, Messages.getString("Client.certificate_error"), Messages.getString("Client.invalid_ca_cert_format"));
+            } else {
+                showErrorDialog(e, Messages.getString("Client.other_error"), null);
+            }
+        } catch (IOException e) {
+            switch (toLowerCaseNullCheck(e.getMessage())) {
+                case "keystore password was incorrect":
+                    showErrorDialog(e, Messages.getString("Client.certificate_error"), Messages.getString("Client.invalid_p12_pass"));
+                    break;
+                case "Detect premature EOF":
+                case "toDerInputStream rejects tag type 45":
+                    showErrorDialog(e, Messages.getString("Client.certificate_error"), Messages.getString("Client.invalid_p12_format"));
+                    break;
+                default:
+                    showErrorDialog(e, Messages.getString("Client.other_error"), null);
+                    break;
+            }
+        } catch (GeneralSecurityException | JSONException e) {
+            showErrorDialog(e, Messages.getString("Client.other_error"), null);
         }
+    }
+
+    private void showErrorDialog(Exception e, String title, String message) {
+        logger.catching(Level.FATAL, e);
+        if (message == null) {
+            message = Messages.getString("Client.other_error_see_log") + e.getLocalizedMessage();
+        }
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
     }
 
     protected ConfigPanel createConfigurationPanel() {

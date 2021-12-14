@@ -76,6 +76,7 @@ public class Protocol {
     private String protocolVersion;
     private String applicationVersion;
     private String serverType;
+    private boolean forceNoProxy;
 
     private int totalExecTime;
     private int appExecTime;
@@ -115,6 +116,16 @@ public class Protocol {
         this.startupMessage = null;
         this.useSSO = useSSO;
         this.serverType = "";
+        /* VPN経由のみNO_PROXYを設定する */
+        if (authURI.contains("sms.orca.orcamo.jp") || authURI.contains("sms-stg.orca.orcamo.jp")) {
+            forceNoProxy = true;
+        } else {
+            forceNoProxy = false;
+        }
+        logger.info("forceNoProxy:" + forceNoProxy);
+        logger.info("proxyHost:" + System.getProperty("proxyHost"));
+        logger.info("proxyPort:" + System.getProperty("proxyPort"));
+        logger.info("nonProxyHosts:" + System.getProperty("nonProxyHosts"));
     }
 
     public boolean enablePushClient() {
@@ -199,14 +210,18 @@ public class Protocol {
         this.sslType = TYPE_SSL_PKCS11;
     }
 
-    private HttpURLConnection getHttpURLConnection(String strURL) throws IOException {
+    public HttpURLConnection getHttpURLConnection(String strURL) throws IOException {
         URL url = new URL(strURL);
         return getHttpURLConnection(url);
     }
 
-    private HttpURLConnection getHttpURLConnection(URL url) throws IOException {
-        HttpURLConnection con = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
-
+    public HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+        HttpURLConnection con;
+        if (forceNoProxy) {
+            con = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
+        } else {
+            con = (HttpURLConnection) url.openConnection();
+        }
         if (url.getProtocol().equals("https")) {
             if (sslSocketFactory != null) {
                 ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
@@ -216,6 +231,10 @@ public class Protocol {
             setAuthHeader(con);
         }
         return con;
+    }
+
+    public boolean isForceNoProxy() {
+        return forceNoProxy;
     }
 
     private String makeJSONRPCRequest(String method, JSONObject params) throws JSONException {
@@ -266,8 +285,8 @@ public class Protocol {
     }
 
     public static ByteArrayOutputStream getHTTPBody(HttpURLConnection con) {
-        try ( ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-            try ( BufferedOutputStream bos = new BufferedOutputStream(bytes)) {
+        try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+            try (BufferedOutputStream bos = new BufferedOutputStream(bytes)) {
                 InputStream stream;
                 try {
                     stream = con.getInputStream();
@@ -336,7 +355,7 @@ public class Protocol {
             this.openid_connect_rp_cookie = "";
         }
 
-        try ( OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
+        try (OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
             osw.write(reqStr);
             osw.flush();
         }
@@ -350,17 +369,24 @@ public class Protocol {
                 // do nothing
                 break;
             case 401:
+                body = getHTTPBody(con).toString("UTF-8");
+                logger.info("" + resCode + " auth error ... " + body);
+                JOptionPane.showMessageDialog(null, Messages.getString("Protocol.auth_error_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
+                break;
             case 403:
                 body = getHTTPBody(con).toString("UTF-8");
                 if (body.equalsIgnoreCase("NOT PERMITTED CERTIFICATE")) {
                     logger.info("403 not permitted certificate");
                     JOptionPane.showMessageDialog(null, Messages.getString("Protocol.certificate_error_message"), Messages.getString("Protocol.certificate_error"), JOptionPane.ERROR_MESSAGE);
                 } else if (body.equalsIgnoreCase("USER NOT IN TENANTDB")) {
-                    logger.info("401 user not in tenantdb");
+                    logger.info("403 user not in tenantdb");
                     JOptionPane.showMessageDialog(null, Messages.getString("Protocol.user_not_in_tenantdb_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
+                } else if (body.equalsIgnoreCase("ON PREMISES ONLY TENANT")) {
+                    logger.info("403 on premises only tenant");
+                    JOptionPane.showMessageDialog(null, Messages.getString("Protocol.on_premises_only_tenant_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
                 } else {
-                    logger.info("" + resCode + " auth error ... " + body);
-                    JOptionPane.showMessageDialog(null, Messages.getString("Protocol.auth_error_message"), Messages.getString("Protocol.auth_error"), JOptionPane.ERROR_MESSAGE);
+                    showHTTPErrorMessage(resCode, resMessage);
                 }
                 System.exit(0);
                 break;
@@ -380,7 +406,7 @@ public class Protocol {
         }
 
         Object result;
-        try ( ByteArrayOutputStream bytes = getHTTPBody(con)) {
+        try (ByteArrayOutputStream bytes = getHTTPBody(con)) {
             long et = System.currentTimeMillis();
             if (System.getProperty("monsia.do_profile") != null) {
                 logger.info(method + ":" + (et - st) + "ms request_bytes:" + reqStr.length() + " response_bytes:" + bytes.size());
@@ -398,7 +424,7 @@ public class Protocol {
     }
 
     private String startOpenIDConnect(String sso_user, String sso_password, String sso_sp_uri, JSONObject params) throws IOException, JSONException {
-        OpenIdConnect sso = new OpenIdConnect(sso_user, sso_password, authURI, params);
+        OpenIdConnect sso = new OpenIdConnect(this, sso_user, sso_password, authURI, params);
         return sso.connect();
     }
 
@@ -542,7 +568,7 @@ public class Protocol {
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
-        try ( BufferedInputStream bis = new BufferedInputStream(con.getInputStream())) {
+        try (BufferedInputStream bis = new BufferedInputStream(con.getInputStream())) {
             int length;
             while ((length = bis.read()) != -1) {
                 out.write(length);
@@ -563,7 +589,7 @@ public class Protocol {
         //((HttpsURLConnection) con.setFixedLengthStreamingMode(in.length);
         con.setRequestProperty("Content-Type", "application/octet-stream");
         con.setRequestProperty("User-Agent", USER_AGENT);
-        try ( OutputStream os = con.getOutputStream()) {
+        try (OutputStream os = con.getOutputStream()) {
             os.write(in);
             os.flush();
         }
