@@ -23,12 +23,6 @@ copies.
 
 package org.montsuqi.monsiaj.widgets;
 
-import java.awt.Component;
-import java.awt.DefaultKeyboardFocusManager;
-import java.awt.event.KeyEvent;
-
-import javax.swing.SwingUtilities;
-
 import org.montsuqi.monsiaj.monsia.Interface;
 
 import javax.swing.*;

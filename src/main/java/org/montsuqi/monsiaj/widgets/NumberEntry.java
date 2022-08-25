@@ -157,8 +157,8 @@ public class NumberEntry extends Entry {
             case KeyEvent.VK_HOME: // fall through
             case KeyEvent.VK_END:
                 if (e.getID() == KeyEvent.KEY_PRESSED || e.getID() == KeyEvent.KEY_RELEASED) {
-                    setValue(NumberDocument.ZERO);
-                }
+                setValue(NumberDocument.ZERO);
+            }
                 e.consume();
                 break;
             default:
@@ -168,7 +168,7 @@ public class NumberEntry extends Entry {
     }
 }
 
-class NumberDocument extends LengthLimitableDocument {
+class NumberDocument extends PlainDocument {
 
     private String originalFormat;
     private NumberFormat format;
