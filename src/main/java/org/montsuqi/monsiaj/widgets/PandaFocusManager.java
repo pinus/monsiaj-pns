@@ -58,7 +58,7 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 					JOptionPane.YES_NO_OPTION,
 					JOptionPane.WARNING_MESSAGE
 				);
-				System.out.println("---  " + opt + ",  " + JOptionPane.YES_OPTION);
+				if (opt == JOptionPane.YES_OPTION) { System.exit(1); }
 			}
 
 			// Window に応じた処理
