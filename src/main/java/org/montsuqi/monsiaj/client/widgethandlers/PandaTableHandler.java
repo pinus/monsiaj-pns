@@ -45,6 +45,7 @@ class PandaTableHandler extends WidgetHandler {
 
     static final Logger logger = LogManager.getLogger(PandaTableHandler.class);
     private static final List<String> widgetList;
+    private int editingRow; //pns 編集中の行
 
     static {
         widgetList = new ArrayList<>();
@@ -53,6 +54,9 @@ class PandaTableHandler extends WidgetHandler {
     @Override
     public void set(UIControl con, Component widget, JSONObject obj, Map styleMap) throws JSONException {
         PandaTable table = (PandaTable) widget;
+
+        //pns 現在編集中の行を保存
+        editingRow = table.getSelectedRow();
 
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
 
@@ -134,6 +138,24 @@ class PandaTableHandler extends WidgetHandler {
 
         widget.validate();
         if (trow >= 0 && tcolumn >= 0) {
+
+            //pns 編集中の行があれば選択を変えない begins
+            int realRowCount = table.getRealRowCount();
+            // 消去されたとき
+            if (realRowCount == 0) { editingRow = 0; }
+
+            if (editingRow == 0 && trow == realRowCount && ! con.getTopWindow().getTitle().equals("読み込み中...")) {
+                // 最初に入ってきたとき
+                trow = 0;
+                editingRow = 0;
+            } else {
+                // 最後の行の編集であれば，selectedRow を１つ下に送る
+                if (realRowCount == editingRow + 1) { trow = realRowCount; }
+                // そうでなければ行を移動しない
+                else { trow = editingRow; }
+            }
+            //pns ends
+
             /*
              * Windows7+Java 1.7で初回表示時にセル指定すると微妙にスクロールする問題のため 初回だけ0,0にセル指定する
              */
