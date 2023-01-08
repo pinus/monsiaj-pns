@@ -13,9 +13,8 @@
     </organization>
 
     <properties>
-        <java.version>1.8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <pluginRepositories>
@@ -109,36 +108,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-jarsigner-plugin</artifactId>
-                            <version>1.4</version>
-                            <executions>
-                                <execution>
-                                    <id>sign</id>
-                                    <goals>
-                                        <goal>sign</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <archiveDirectory>${project.build.directory}</archiveDirectory>
-                                <excludeClassifiers>
-                                    <excludeClassifier>bin</excludeClassifier>
-                                    <excludeClassifier>src</excludeClassifier>
-                                </excludeClassifiers>
-                                <arguments>
-                                   <argument>-tsa</argument>
-                                   <argument>http://timestamp.comodoca.com/rfc3161</argument>
-                                </arguments>
-                                <keystore>${project.basedir}/orca_jws2021</keystore>
-                                <alias>orca_jws2021</alias>
-                                <storepass>orca_jws2021</storepass>
-                                <keypass>orca_jws2021</keypass>
-                            </configuration>
-                        </plugin>
-            -->
 
             <!-- rename distribution archive  -->
             <plugin>
@@ -146,54 +115,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <executions>
-                    <!-- make mac app bundle -->
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target name="bundle">
-                                <!-- Obtain path to the selected JRE -->
-                                <exec executable="/usr/libexec/java_home"
-                                      failonerror="true"
-                                      outputproperty="runtime">
-                                    <arg value="-v"/>
-                                    <arg value="${java.version}"/>
-                                </exec>
-                                <property name="target.dir" value="${project.build.directory}" />
-                                <property name="icon.dir" value="${basedir}/resources" />
-                                <property name="icon.name" value="jma-logo.icns"/>
-                                <property name="macosx.app.name" value="JMA Receipt"/>
-                                <property environment="env" />
-
-                                <taskdef name="bundleapp"
-                                         classname="com.oracle.appbundler.AppBundlerTask"
-                                         classpath="lib/appbundler-1.0ea.jar" />
-                                <bundleapp outputdirectory="${target.dir}"
-                                           name="${macosx.app.name}"
-                                           displayname="${macosx.app.name}"
-                                           identifier="${macosx.app.name}"
-                                           mainclassname="org.montsuqi.monsiaj.client.Launcher"
-                                           icon="${icon.dir}/${icon.name}"
-                                           shortversion="${project.version}-${maven.build.timestamp}"
-                                           version="${project.version}-${maven.build.timestamp}" >
-
-                                    <!-- include java runtime into pacakge
-                                    <runtime dir="${runtime}"/>
-                                    -->
-                                    <classpath file="${target.dir}/monsiaj-${project.version}-all.jar" />
-                                    <option value="-Xdock:icon=Contents/Resources/${icon.name}"/>
-                                    <option value="-Dapple.laf.useScreenMenuBar=true"/>
-                                    <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
-                                    <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
-                                    <option value="-Dapple.awt.application.name=${macosx.app.name}"/>
-                                    <option value="-Duser.dir=$APP_ROOT/.." />
-                                </bundleapp>
-                            </target>
-                        </configuration>
-                    </execution>
-
                     <execution>
                         <id>rename-dist-archives</id>
                         <phase>package</phase>
@@ -201,7 +122,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target>
+                            <tasks>
                                 <echo>mkdir out</echo>
                                 <delete dir="${project.build.directory}/out"/>
                                 <mkdir dir="${project.build.directory}/out"/>
@@ -215,7 +136,7 @@
                                         <include name="*"/>
                                     </fileset>
                                 </checksum>
-                            </target>
+                            </tasks>
                         </configuration>
                     </execution>
                 </executions>
@@ -223,7 +144,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>

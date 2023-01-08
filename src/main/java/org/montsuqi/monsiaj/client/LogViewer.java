@@ -50,8 +50,6 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
-
-import org.apache.commons.lang.StringUtils;
 import org.montsuqi.monsiaj.util.SystemEnvironment;
 
 public class LogViewer {
@@ -135,8 +133,7 @@ public class LogViewer {
             String line, datetime, window, widget, event, com, rpc, server, app;
             datetime = window = widget = event = com = rpc = server = app = "";
             while ((line = br.readLine()) != null) {
-                //if (host.isBlank()) {
-                if (StringUtils.isBlank(host)) {
+                if (host.isBlank()) {
                     Matcher m1 = p1.matcher(line);
                     if (m1.find()) {
                         host = m1.group(1);

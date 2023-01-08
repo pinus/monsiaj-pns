@@ -6,16 +6,17 @@
 package org.montsuqi.monsiaj.client;
 
 import org.montsuqi.monsiaj.util.Messages;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.EventQueue;
+
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -248,6 +249,27 @@ public class UIControl {
         if (window.isDialog()) {
             topWindow.showBusyCursor();
             JDialog dialog = window.createDialog(topWindow);
+
+            //pns if P031 dialog has PERR/PID1 dialog over it, then show PERR/PID1 dialog always front
+            if (dialog.getName().contains("P031") && Objects.nonNull(System.getProperty("monsia.errordialog.alwaysontop"))) {
+                dialog.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowActivated(WindowEvent e) {
+                        logger.info("P031 activated...");
+                        for (Frame f : Frame.getFrames()) {
+                            if ("PID1".equals(f.getName()) || "PERR".equals(f.getName())) {
+                                logger.info("P031 PERR/PID1 dialog detected");
+                                JDialog d = ((Window) f).getDialog();
+                                if (Objects.nonNull(d)) {
+                                    logger.info("P031 ERR/PID1 dialog set to front");
+                                    d.toFront();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
 
             window.getChild().setBackground(this.sessionBGColor);
             dialog.validate();

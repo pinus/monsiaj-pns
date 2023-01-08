@@ -217,7 +217,7 @@ public class PandaTable extends JTable {
 
             @Override
             public void focusGained(FocusEvent e) {
-                // do nothing                
+                // do nothing
                 if (SystemEnvironment.isWindows()) {
                     if (imControls[getSelectedColumn()]) {
                         InputContext ic = getInputContext();
@@ -240,7 +240,7 @@ public class PandaTable extends JTable {
                         ic.selectInputMethod(Locale.ENGLISH);
                     }
                 }
-                ce.stopCellEditing();                
+                ce.stopCellEditing();
             }
         });
 
@@ -403,7 +403,6 @@ public class PandaTable extends JTable {
     @Override
     public Dimension getPreferredSize() {
         Dimension size = super.getPreferredSize();
-
         int realRowCount = getRealRowCount();
 
         // 実データを表示するのに必要な高さ
@@ -417,7 +416,6 @@ public class PandaTable extends JTable {
                 size.height = view.getHeight();
             }
         }
-
         return size;
     }
 
