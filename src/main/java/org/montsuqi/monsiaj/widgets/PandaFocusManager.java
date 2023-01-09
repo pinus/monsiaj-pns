@@ -155,6 +155,7 @@ public class PandaFocusManager extends DefaultKeyboardFocusManager {
 						for (int row=0; row<table.getRows(); row++) {
 							for (int col=0; col<table.getColumns(); col++) {
 								if (table.getValueAt(row, col).equals("112011010")) { // 外来管理加算
+									table.changeSelection(row, col, false, false);
 									table.setValueAt("", row, col);
 									break;
 								}
