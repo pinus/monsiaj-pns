@@ -15,6 +15,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
     </properties>
 
     <pluginRepositories>
@@ -115,6 +116,26 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <executions>
+                    <!-- make jre antrun:run@jre -->
+                    <execution>
+                        <id>jre</id>
+                        <configuration>
+                            <tasks>
+                                <echo>making jre using jlink</echo>
+                                <property name="jredir" value="${basedir}/appRuntimeImage/jre" />
+                                <delete dir="${jredir}" />
+                                <exec executable="/usr/bin/jlink">
+                                    <arg value="--no-header-files" />
+                                    <arg value="--no-man-pages" />
+                                    <arg value="--strip-debug" />
+                                    <arg value="--compress=2" />
+                                    <arg line="--add-modules java.base,java.desktop,java.logging,java.naming,java.prefs,java.management,java.xml,jdk.unsupported" />
+                                    <arg line="--output ${jredir}" />
+                                </exec>
+                            </tasks>
+                        </configuration>
+                    </execution>
+
                     <execution>
                         <id>rename-dist-archives</id>
                         <phase>package</phase>
@@ -126,6 +147,21 @@
                                 <echo>mkdir out</echo>
                                 <delete dir="${project.build.directory}/out"/>
                                 <mkdir dir="${project.build.directory}/out"/>
+                                <mkdir dir="${project.build.directory}/tmp"/>
+
+                                <echo>make macintosh app</echo>
+                                <copy file="${project.build.directory}/monsiaj-${project.version}-all.jar" todir="${project.build.directory}/tmp" />
+                                <exec executable="/usr/bin/jpackage">
+                                    <arg line="-n JMA-Receipt" />
+                                    <arg line="--type app-image" />
+                                    <arg line="-i ${project.build.directory}/tmp" />
+                                    <arg line="-d ${project.build.directory}/out" />
+                                    <arg line="--main-jar ${project.build.directory}/monsiaj-${project.version}-all.jar" />
+                                    <arg line="--icon ${basedir}/resources/jma-logo.icns" />
+                                    <arg line="--runtime-image ${basedir}/appRuntimeImage/jre" />
+                                </exec>
+                                <delete dir="${project.build.directory}/tmp"/>
+
                                 <echo>rename-dist-archives</echo>
                                 <move file="${project.build.directory}/monsiaj-${project.version}-bin.zip" tofile="${project.build.directory}/out/monsiaj-bin-${project.version}.zip" />
                                 <move file="${project.build.directory}/monsiaj-${project.version}-src.zip" tofile="${project.build.directory}/out/monsiaj-src-${project.version}.zip" />

@@ -89,8 +89,9 @@ public class TopWindow extends Window implements ComponentListener {
     public TopWindow() {
         super();
 
-        URL iconURL = getClass().getResource("/images/orcamo.png");
-        setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
+        //pns no icon for JFrame
+        //URL iconURL = getClass().getResource("/images/orcamo.png");
+        //setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
         int x, y, width, height;
         x = prefs.getInt(this.getClass().getName() + ".x", 0);
