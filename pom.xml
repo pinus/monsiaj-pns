@@ -144,7 +144,7 @@
                     <execution>
                         <id>jre</id>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <echo>making jre using jlink</echo>
                                 <property name="jredir" value="${basedir}/appRuntimeImage/jre" />
                                 <delete dir="${jredir}" />
@@ -156,7 +156,7 @@
                                     <arg line="--add-modules java.base,java.desktop,java.logging,java.naming,java.prefs,java.management,java.xml,jdk.unsupported" />
                                     <arg line="--output ${jredir}" />
                                 </exec>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
 
@@ -167,13 +167,13 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <echo>mkdir out</echo>
                                 <delete dir="${project.build.directory}/out"/>
                                 <mkdir dir="${project.build.directory}/out"/>
                                 <mkdir dir="${project.build.directory}/tmp"/>
 
-                                <echo>make macintosh app</echo>
+                                <echo>make pakcage</echo>
                                 <copy file="${project.build.directory}/monsiaj-${project.version}-all.jar" todir="${project.build.directory}/tmp" />
                                 <exec executable="${java.jpackage}">
                                     <arg line="-n JMA-Receipt" />
@@ -196,7 +196,7 @@
                                         <include name="*"/>
                                     </fileset>
                                 </checksum>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
