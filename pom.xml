@@ -43,6 +43,7 @@
                 <java.jlink>/usr/bin/jlink</java.jlink>
                 <java.jpackage>/usr/bin/jpackage</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.icns</java.jpackage.icon>
+                <java.jpackage.type>dmg</java.jpackage.type>
             </properties>
         </profile>
         <profile>
@@ -51,6 +52,7 @@
                 <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
                 <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.ico</java.jpackage.icon>
+                <java.jpackage.type>exe</java.jpackage.type>
             </properties>
         </profile>
     </profiles>
@@ -175,7 +177,7 @@
                                 <copy file="${project.build.directory}/monsiaj-${project.version}-all.jar" todir="${project.build.directory}/tmp" />
                                 <exec executable="${java.jpackage}">
                                     <arg line="-n JMA-Receipt" />
-                                    <arg line="--type app-image" />
+                                    <arg line="--type ${java.jpackage.type}" />
                                     <arg line="-i ${project.build.directory}/tmp" />
                                     <arg line="-d ${project.build.directory}/out" />
                                     <arg line="--main-jar ${project.build.directory}/monsiaj-${project.version}-all.jar" />
