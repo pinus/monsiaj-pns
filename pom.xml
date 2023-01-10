@@ -42,7 +42,7 @@
             <properties>
                 <java.jlink>/usr/bin/jlink</java.jlink>
                 <java.jpackage>/usr/bin/jpackage</java.jpackage>
-                <java.jpackage.icon>jma-logo.icns</java.jpackage.icon>
+                <java.jpackage.icon>${basedir}/resources/jma-logo.icns</java.jpackage.icon>
             </properties>
         </profile>
         <profile>
@@ -50,7 +50,7 @@
             <properties>
                 <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
                 <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
-                <java.jpackage.icon>jma-logo.ico</java.jpackage.icon>
+                <java.jpackage.icon>${basedir}/resources/jma-logo.ico</java.jpackage.icon>
             </properties>
         </profile>
     </profiles>
@@ -179,7 +179,7 @@
                                     <arg line="-i ${project.build.directory}/tmp" />
                                     <arg line="-d ${project.build.directory}/out" />
                                     <arg line="--main-jar ${project.build.directory}/monsiaj-${project.version}-all.jar" />
-                                    <arg line="--icon ${basedir}/resources/${java.jpackage.icon}" />
+                                    <arg line="--icon ${java.jpackage.icon}" />
                                     <arg line="--runtime-image ${basedir}/appRuntimeImage/jre" />
                                 </exec>
                                 <delete dir="${project.build.directory}/tmp"/>
