@@ -33,6 +33,28 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <profiles>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java.jlink>/usr/bin/jlink</java.jlink>
+                <java.jpackage>/usr/bin/jpackage</java.jpackage>
+                <java.jpackage.icon>jma-logo.icns</java.jpackage.icon>
+            </properties>
+        </profile>
+        <profile>
+            <id>win</id>
+            <properties>
+                <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
+                <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
+                <java.jpackage.icon>jma-logo.ico</java.jpackage.icon>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -124,7 +146,7 @@
                                 <echo>making jre using jlink</echo>
                                 <property name="jredir" value="${basedir}/appRuntimeImage/jre" />
                                 <delete dir="${jredir}" />
-                                <exec executable="/usr/bin/jlink">
+                                <exec executable="${java.jlink}">
                                     <arg value="--no-header-files" />
                                     <arg value="--no-man-pages" />
                                     <arg value="--strip-debug" />
@@ -151,13 +173,13 @@
 
                                 <echo>make macintosh app</echo>
                                 <copy file="${project.build.directory}/monsiaj-${project.version}-all.jar" todir="${project.build.directory}/tmp" />
-                                <exec executable="/usr/bin/jpackage">
+                                <exec executable="${java.jpackage}">
                                     <arg line="-n JMA-Receipt" />
                                     <arg line="--type app-image" />
                                     <arg line="-i ${project.build.directory}/tmp" />
                                     <arg line="-d ${project.build.directory}/out" />
                                     <arg line="--main-jar ${project.build.directory}/monsiaj-${project.version}-all.jar" />
-                                    <arg line="--icon ${basedir}/resources/jma-logo.icns" />
+                                    <arg line="--icon ${basedir}/resources/${java.jpackage.icon}" />
                                     <arg line="--runtime-image ${basedir}/appRuntimeImage/jre" />
                                 </exec>
                                 <delete dir="${project.build.directory}/tmp"/>
