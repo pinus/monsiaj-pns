@@ -52,7 +52,7 @@
                 <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
                 <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.ico</java.jpackage.icon>
-                <java.jpackage.type>exe</java.jpackage.type>
+                <java.jpackage.type>msi</java.jpackage.type>
             </properties>
         </profile>
     </profiles>
@@ -180,7 +180,7 @@
                                     <arg line="--type ${java.jpackage.type}" />
                                     <arg line="-i ${project.build.directory}/tmp" />
                                     <arg line="-d ${project.build.directory}/out" />
-                                    <arg line="--main-jar ${project.build.directory}/monsiaj-${project.version}-all.jar" />
+                                    <arg line="--main-jar monsiaj-${project.version}-all.jar" />
                                     <arg line="--icon ${java.jpackage.icon}" />
                                     <arg line="--runtime-image ${basedir}/appRuntimeImage/jre" />
                                 </exec>
