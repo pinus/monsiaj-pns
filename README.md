@@ -1,4 +1,4 @@
-## monsiaj-mac ##
+## monsiaj-pns ##
 monsiaj version 2.0.31 を元にカスタマイズした。Java 17 で運用中。
 
 ### pom.xml ###
