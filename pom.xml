@@ -35,11 +35,13 @@
 
     <profiles>
         <profile>
-            <id>mac</id>
+            <id>mac-aarch64</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
+                <jfx.platform>mac-aarch64</jfx.platform>
+                <java.jre.dir>${basedir}/appRuntimeImage/jre</java.jre.dir>
                 <java.jlink>/usr/bin/jlink</java.jlink>
                 <java.jpackage>/usr/bin/jpackage</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.icns</java.jpackage.icon>
@@ -47,8 +49,23 @@
             </properties>
         </profile>
         <profile>
+            <id>mac</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <jfx.platform>mac</jfx.platform>
+                <java.jre.dir>${basedir}/appRuntimeImage/jre-x86</java.jre.dir>
+                <java.jlink>/Library/Java/JavaVirtualMachines/jdk-17.0.7-x64.jdk/Contents/Home/bin/jlink</java.jlink>
+                <java.jpackage>/Library/Java/JavaVirtualMachines/jdk-17.0.7-x64.jdk/Contents/Home/bin/jpackage</java.jpackage>
+                <java.jpackage.icon>${basedir}/resources/jma-logo.icns</java.jpackage.icon>
+                <java.jpackage.type>dmg</java.jpackage.type>
+            </properties>
+        </profile>
+        <profile>
             <id>win</id>
             <properties>
+                <jfx.platform>win</jfx.platform>
                 <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
                 <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.ico</java.jpackage.icon>
@@ -146,15 +163,14 @@
                         <configuration>
                             <target>
                                 <echo>making jre using jlink</echo>
-                                <property name="jredir" value="${basedir}/appRuntimeImage/jre" />
-                                <delete dir="${jredir}" />
+                                <delete dir="${java.jre.dir}" />
                                 <exec executable="${java.jlink}">
                                     <arg value="--no-header-files" />
                                     <arg value="--no-man-pages" />
                                     <arg value="--strip-debug" />
                                     <arg value="--compress=2" />
                                     <arg line="--add-modules java.base,java.desktop,java.logging,java.naming,java.prefs,java.management,java.xml,jdk.unsupported" />
-                                    <arg line="--output ${jredir}" />
+                                    <arg line="--output ${java.jre.dir}" />
                                 </exec>
                             </target>
                         </configuration>
@@ -182,7 +198,7 @@
                                     <arg line="-d ${project.build.directory}/out" />
                                     <arg line="--main-jar monsiaj-${project.version}-all.jar" />
                                     <arg line="--icon ${java.jpackage.icon}" />
-                                    <arg line="--runtime-image ${basedir}/appRuntimeImage/jre" />
+                                    <arg line="--runtime-image ${java.jre.dir}" />
                                 </exec>
                                 <delete dir="${project.build.directory}/tmp"/>
 

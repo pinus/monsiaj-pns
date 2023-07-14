@@ -9,8 +9,5 @@
         <module name="monsiaj" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="monsiaj" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
