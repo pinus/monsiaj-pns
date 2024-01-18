@@ -49,7 +49,22 @@
             </properties>
         </profile>
         <profile>
-            <id>mac</id>
+            <id>mac-graalvm</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <jfx.platform>mac-aarch64</jfx.platform>
+                <java.bin.dir>/Library/Java/JavaVirtualMachines/graalvm-jdk-17.0.10+11.1/Contents/Home/bin</java.bin.dir>
+                <java.jre.dir>${basedir}/appRuntimeImage/jre-graal</java.jre.dir>
+                <java.jlink>${java.bin.dir}/jlink</java.jlink>
+                <java.jpackage>${java.bin.dir}/jpackage</java.jpackage>
+                <java.jpackage.icon>${basedir}/resources/jma-logo.icns</java.jpackage.icon>
+                <java.jpackage.type>dmg</java.jpackage.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-x86</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
