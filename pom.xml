@@ -16,6 +16,15 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
+
+        <hydraulic.conveyor>/Applications/Conveyor.app/Contents/MacOS/conveyor</hydraulic.conveyor>
+        <hydraulic.conveyor.output.dir>${basedir}/output</hydraulic.conveyor.output.dir>
+
+        <!-- バージョニングに使う日付 -->
+        <buildDate>${maven.build.timestamp}</buildDate>
+        <!-- バージョニングに使う日付のフォーマット -->
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
     </properties>
 
     <pluginRepositories>
@@ -41,6 +50,8 @@
             </activation>
             <properties>
                 <jfx.platform>mac-aarch64</jfx.platform>
+                <hydraulic.conveyor.machine>mac.aarch64</hydraulic.conveyor.machine>
+                <hydraulic.convayor.target>mac-app</hydraulic.convayor.target>
                 <java.jre.dir>${basedir}/appRuntimeImage/jre</java.jre.dir>
                 <java.jlink>/usr/bin/jlink</java.jlink>
                 <java.jpackage>/usr/bin/jpackage</java.jpackage>
@@ -55,7 +66,9 @@
             </activation>
             <properties>
                 <jfx.platform>mac-aarch64</jfx.platform>
-                <java.bin.dir>/Library/Java/JavaVirtualMachines/graalvm-jdk-17.0.10+11.1/Contents/Home/bin</java.bin.dir>
+                <hydraulic.conveyor.machine>mac.aarch64</hydraulic.conveyor.machine>
+                <hydraulic.convayor.target>mac-app</hydraulic.convayor.target>
+                <java.bin.dir>/Library/Java/JavaVirtualMachines/graalvm-jdk-17/Contents/Home/bin</java.bin.dir>
                 <java.jre.dir>${basedir}/appRuntimeImage/jre-graal</java.jre.dir>
                 <java.jlink>${java.bin.dir}/jlink</java.jlink>
                 <java.jpackage>${java.bin.dir}/jpackage</java.jpackage>
@@ -64,12 +77,14 @@
             </properties>
         </profile>
         <profile>
-            <id>mac-x86</id>
+            <id>mac-amd64</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <jfx.platform>mac</jfx.platform>
+                <hydraulic.conveyor.machine>mac.amd64</hydraulic.conveyor.machine>
+                <hydraulic.convayor.target>mac-app</hydraulic.convayor.target>
                 <java.jre.dir>${basedir}/appRuntimeImage/jre-x86</java.jre.dir>
                 <java.jlink>/Library/Java/JavaVirtualMachines/jdk-17.0.7-x64.jdk/Contents/Home/bin/jlink</java.jlink>
                 <java.jpackage>/Library/Java/JavaVirtualMachines/jdk-17.0.7-x64.jdk/Contents/Home/bin/jpackage</java.jpackage>
@@ -81,6 +96,8 @@
             <id>win</id>
             <properties>
                 <jfx.platform>win</jfx.platform>
+                <hydraulic.conveyor.machine>windows.amd64</hydraulic.conveyor.machine>
+                <hydraulic.convayor.target>windows-msix</hydraulic.convayor.target>
                 <java.jlink>${java.home}/bin/jlink.exe</java.jlink>
                 <java.jpackage>${java.home}/bin/jpackage.exe</java.jpackage>
                 <java.jpackage.icon>${basedir}/resources/jma-logo.ico</java.jpackage.icon>
@@ -193,10 +210,6 @@
 
                     <execution>
                         <id>rename-dist-archives</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                         <configuration>
                             <target>
                                 <echo>mkdir out</echo>
@@ -228,6 +241,25 @@
                                     </fileset>
                                 </checksum>
                             </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>conveyor</id>
+                        <configuration>
+                            <target>
+                                <echo>make app with hydraulic conveyor</echo>
+                                <delete dir="${hydraulic.conveyor.output.dir}" />
+                                <exec executable="${hydraulic.conveyor}">
+                                    <arg line="-Kproject.version=${project.version}" />
+                                    <arg line="-Kapp.machines=${hydraulic.conveyor.machine}" />
+                                    <arg line="make ${hydraulic.convayor.target}" />
+                                </exec>
+                        <exec executable="tar">
+                            <arg line="czf ${hydraulic.conveyor.output.dir}/JMA-Receipt-${buildDate}.tgz" />
+                            <arg line="-C ${hydraulic.conveyor.output.dir}" />
+                            <arg line="JMA-Receipt.app" />
+                        </exec>
+                        </target>
                         </configuration>
                     </execution>
                 </executions>
