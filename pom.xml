@@ -135,7 +135,6 @@
                     <execution>
                         <id>make-bin-zip</id>
                         <configuration>
-                            <finalName>monsiaj-${project.version}</finalName>
                             <descriptors>
                                 <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
                                 <descriptor>src/assembly/bin.xml</descriptor>
@@ -254,23 +253,43 @@
                                     <arg line="-Kapp.machines=${hydraulic.conveyor.machine}" />
                                     <arg line="make ${hydraulic.convayor.target}" />
                                 </exec>
-                        <exec executable="tar">
-                            <arg line="czf ${hydraulic.conveyor.output.dir}/JMA-Receipt-${buildDate}.tgz" />
-                            <arg line="-C ${hydraulic.conveyor.output.dir}" />
-                            <arg line="JMA-Receipt.app" />
-                        </exec>
                         </target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>tar</id>
+                        <configuration>
+                            <target>
+                                <echo>make tar</echo>
+                                <exec executable="tar">
+                                    <arg line="czf ${hydraulic.conveyor.output.dir}/JMA-Receipt-${buildDate}.tgz" />
+                                    <arg line="-C ${hydraulic.conveyor.output.dir}" />
+                                    <arg line="JMA-Receipt.app" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <!-- make conveyor site by mvn site -->
+                    <!-- transport certificate into trusted user -->
+                    <execution>
+                        <id>conveyor-site</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo>make site with hydraulic conveyor</echo>
+                                <delete dir="${hydraulic.conveyor.output.dir}" />
+                                <exec executable="${hydraulic.conveyor}">
+                                    <arg line="-Kproject.version=${project.version}" />
+                                    <arg line="make copied-site" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
             </plugin>
         </plugins>
     </build>

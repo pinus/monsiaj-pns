@@ -1,3 +1,5 @@
 appRuntimeImage
-.idea
-
+/output/
+/.idea/
+/.run/
+/.idea/
